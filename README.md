@@ -6,7 +6,7 @@ This repository contains custom extensions for Vegetation Studio Pro. Feel free 
 
 ### Center / Grow / Shrink Vegetation and Biome Masks
 
-##### Vegetation Mask Area
+#### Vegetation Mask Area
 
 Adding the ```VegetationMaskAreaExtension.cs``` script to your Vegetation Mask Area will give you options to center the gameobject handle, grow the mask and shrink the mask.
 
@@ -19,7 +19,7 @@ Example:
 ![vegetation-mask-example](https://user-images.githubusercontent.com/10963432/53322065-8d876f00-38da-11e9-958a-f452a3149cc2.gif)
 
 
-##### Biome Mask Area
+#### Biome Mask Area
 
 Adding the ```BiomeMaskAreaExtension.cs``` script to Biome Mask Area will give you options to center the gameobject handle, grow the mask and shrink the mask.
 
