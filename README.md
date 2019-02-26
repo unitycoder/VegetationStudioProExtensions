@@ -31,9 +31,29 @@ Example:
 
 ![biome-mask-example](https://user-images.githubusercontent.com/10963432/53323770-60898b00-38df-11e9-9842-284e784c54d2.gif)
 
+---
+
 ### Mask Creation Menu
 
 Custom menu in hierarchy for the creation of Biome and Vegetation Mask Area gameobjects. These will also add the ```VegetationMaskAreaExtension.cs``` or ```BiomeMaskAreaExtension.cs``` scripts:
 
 ![hierarchy-mask-menu](https://user-images.githubusercontent.com/10963432/53320727-c7ef0d00-38d6-11e9-9a72-59baae57face.png)
+
+---
+
+### Automatic creation of a Vegetation Mask Line
+
+With the ```VegetationMaskLineExtension.cs``` extension attached to a gameobject you can have a Vegetation Mask Line automatically generated. All you have to do is provide it a container (parent gameobject). The transforms of the children of this container will be used to create a Vegetation Mask Line.
+
+Inspector, empty:
+
+![vegetation-mask-line-empty](https://user-images.githubusercontent.com/10963432/53391878-fb45a080-3997-11e9-8d9e-be9585445eb5.png)
+
+Inspector, container specified:
+
+![vegetation-mask-line-filled](https://user-images.githubusercontent.com/10963432/53391879-fed92780-3997-11e9-812d-34351fe3ed77.png)
+
+Example:
+
+![vegetation-mask-line-example](https://user-images.githubusercontent.com/10963432/53392096-aeae9500-3998-11e9-844d-83ae85d7c232.gif)
 
