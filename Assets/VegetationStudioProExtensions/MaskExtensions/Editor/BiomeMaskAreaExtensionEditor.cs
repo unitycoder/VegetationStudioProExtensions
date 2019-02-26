@@ -12,7 +12,7 @@ namespace VegetationStudioProExtensions
 {
     [CustomEditor(typeof(BiomeMaskAreaExtension))]
     [CanEditMultipleObjects]
-    public class BiomeMaskAreaExtensionEditor : Editor
+    public class BiomeMaskAreaExtensionEditor : BaseEditor<BiomeMaskAreaExtension>
     {
         private BiomeMaskAreaExtension extension;
         private BiomeMaskArea mask;
