@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEditor;
 using System.Linq;
+using System;
 
 namespace VegetationStudioProExtensions
 {
@@ -13,6 +14,7 @@ namespace VegetationStudioProExtensions
         private VegetationMaskLine mask;
 
         private SerializedProperty container;
+        private SerializedProperty closedPath;
 
         public void OnEnable()
         {
@@ -21,6 +23,7 @@ namespace VegetationStudioProExtensions
             mask = extension.GetComponent<VegetationMaskLine>();
 
             container = FindProperty(x => x.container);
+            closedPath = FindProperty(x => x.closedPath);
         }
 
         public override void OnInspectorGUI()
@@ -54,6 +57,8 @@ namespace VegetationStudioProExtensions
                 GUILayout.EndHorizontal();
 
                 EditorGUILayout.LabelField("Children", GetChildCount().ToString());
+
+                EditorGUILayout.PropertyField(closedPath, new GUIContent("Closed Path", "If Closed Path is selected, then the last point will be connected to the first point"));
 
                 EditorGUILayout.Space();
 
@@ -110,6 +115,16 @@ namespace VegetationStudioProExtensions
             }
 
             Vector3[] positions = extension.container.GetComponentsInChildren<Transform>().Select(x => x.position).ToArray();
+
+            // closed path: connect last with first position
+            if( closedPath.boolValue && positions.Length > 1)
+            {
+                // resize array by 1
+                Array.Resize(ref positions, positions.Length + 1);
+
+                // add first position as last position
+                positions[positions.Length - 1] = positions[0];
+            }
 
             mask.ClearNodes();
             mask.AddNodesToEnd(positions);
