@@ -1,10 +1,16 @@
 ﻿using UnityEngine;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 
 namespace VegetationStudioProExtensions
 {
+    [ExecuteInEditMode]
     public class MenuExtension : MonoBehaviour
     {
+
+#if UNITY_EDITOR
+
         // Add a menu item to create custom GameObjects.
         // Priority 1 ensures it is grouped with the other menu items of the same kind
         // and propagated to the hierarchy dropdown and hierarchy context menus.
@@ -71,5 +77,8 @@ namespace VegetationStudioProExtensions
 
         }
 
+#endif
+
     }
+
 }
