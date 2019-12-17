@@ -46,6 +46,23 @@ namespace VegetationStudioProExtensions
 
             GUILayout.EndHorizontal();
 
+            GUILayout.BeginHorizontal();
+
+            if (GUILayout.Button("Subdivide"))
+            {
+                Subdivide();
+            }
+            else if (GUILayout.Button("Unsubdivide"))
+            {
+                Unsubdivide();
+            }
+            else if (GUILayout.Button("Circle"))
+            {
+                CreateCircle();
+            }
+
+            GUILayout.EndHorizontal();
+
             serializedObject.ApplyModifiedProperties();
         }
 
@@ -127,6 +144,96 @@ namespace VegetationStudioProExtensions
                 z += pos.z;
             }
             return new Vector3(x / positions.Length, y / positions.Length, z / positions.Length);
+        }
+
+        /// <summary>
+        /// Insert a new node between every node segment of the area
+        /// </summary>
+        private void Subdivide()
+        {
+            List<Node> originalNodes = new List<Node>();
+            originalNodes.AddRange(mask.Nodes);
+
+            for (var i = 0; i < originalNodes.Count; i++)
+            {
+                Node curr = originalNodes[i];
+                Node next = mask.GetNextNode(curr);
+
+                Vector3[] segment = new Vector3[] { curr.Position, next.Position };
+
+                Vector3 meanVector = GetMeanVector(segment);
+
+                int index = mask.GetNodeIndex(curr);
+
+                Node newNode = new Node()
+                {
+                    Position = meanVector
+                };
+
+                mask.Nodes.Insert(index + 1, newNode);
+            }
+
+            UpdateMask();
+        }
+
+        /// <summary>
+        /// Remove every 2nd node
+        /// </summary>
+        private void Unsubdivide()
+        {
+            // ensure there is at least the specified number of nodes left
+            int minimumNodeCount = 3;
+
+            if (mask.Nodes.Count <= minimumNodeCount)
+                return;
+
+            int count = mask.Nodes.Count;
+            for (var i = 1; i < mask.Nodes.Count; i += 2)
+            {
+                mask.Nodes.RemoveAt(i);
+
+                if (mask.Nodes.Count < minimumNodeCount)
+                    break;
+
+            }
+
+            UpdateMask();
+        }
+
+        /// <summary>
+        /// Distribute the nodes along a circle
+        /// </summary>
+        private void CreateCircle()
+        {
+
+            Vector3 maskCenter = GetMaskCenter();
+            List<Vector3> worldPositions = mask.GetWorldSpaceNodePositions();
+
+            // calculate the radius by using the average distance from the mask center
+            float magnitudeSum = 0f;
+            foreach (Vector3 worldPosition in worldPositions)
+            {
+                magnitudeSum += (worldPosition - maskCenter).magnitude;
+            }
+
+            float radius = magnitudeSum / mask.Nodes.Count;
+
+
+            // distribute along the circle
+            int count = mask.Nodes.Count;
+            for (int i = 0; i < count; i++)
+            {
+                Node node = mask.Nodes[i];
+
+                float angle = i * Mathf.PI * 2f / count;
+
+                Vector3 newPosition = new Vector3(Mathf.Cos(angle) * radius, node.Position.y, Mathf.Sin(angle) * radius);
+
+                node.Position = newPosition;
+            }
+
+            UpdateMask();
+
         }
     }
 }
