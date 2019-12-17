@@ -188,7 +188,7 @@ namespace VegetationStudioProExtensions
                 return;
 
             int count = mask.Nodes.Count;
-            for (var i = 1; i < mask.Nodes.Count; i += 2)
+            for (var i = mask.Nodes.Count - 1; i >= 0; i -= 2)
             {
                 mask.Nodes.RemoveAt(i);
 
