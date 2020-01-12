@@ -2,6 +2,17 @@
 
 This repository contains custom extensions for Vegetation Studio Pro. Feel free to use in your own projects.
 
+## Requirements
+
+* Vegetation Studio Pro
+
+  https://assetstore.unity.com/packages/tools/terrain/vegetation-studio-pro-131835
+
+## Installation
+
+* Install Vegetation Studio Pro
+* Copy the contents of this repository to your Assets folder
+
 ## Mask Extensions
 
 ### Center / Grow / Shrink Vegetation and Biome Masks
@@ -41,6 +52,34 @@ Custom menu in hierarchy for the creation of Biome and Vegetation Mask Area game
 
 ---
 
+### Additional Functions
+
+Additional functions for Vegetation Mask Area and Biome Mask Area
+
+![more-functions](https://user-images.githubusercontent.com/10963432/72217536-8dfb1980-352f-11ea-8fa1-caaad2d66e1e.png)
+
+* Circle
+
+  Get the bounds of the mask and create a circular shape using the existing nodes
+
+* Hexagon 
+ 
+  Get the bounds of the mask and create a Hexagon
+
+* Convex Hull
+
+  Get all the nodes of the mask and create a Convex Hull using them
+
+* Subdivide
+
+  Adds a new node between the nodes
+
+* Unsubdivide
+
+  Removes every second node
+
+---
+
 ### Automatic creation of a Vegetation Mask Line
 
 With the ```VegetationMaskLineExtension.cs``` extension attached to a gameobject you can have a Vegetation Mask Line automatically generated. All you have to do is provide it a container (parent gameobject). The transforms of the children of this container will be used to create a Vegetation Mask Line.
@@ -57,3 +96,17 @@ Example:
 
 ![vegetation-mask-line-example](https://user-images.githubusercontent.com/10963432/53392096-aeae9500-3998-11e9-844d-83ae85d7c232.gif)
 
+## Batch Functions
+
+Custom Functions for use with Vegetation Studio Pro
+
+Rutime Spawn: Enable or Disable "run-time spawn" of all of the Vegetation Items of the selected Biome.
+
+![batch-functions](https://user-images.githubusercontent.com/10963432/72217509-30ff6380-352f-11ea-8235-417559de31a7.png)
+
+
+## Credits
+
+Rafael Kuebler
+
+https://github.com/RafaelKuebler/DelaunayVoronoi
