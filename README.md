@@ -154,9 +154,13 @@ More procedural spawners like Lake creation will follow in a future update.
 
   For Vegetation Studio and Vegetation Studio Pro and his most awesome support
 
-* Bart - Naturemanufacture
+  https://assetstore.unity.com/publishers/25402
+
+* Bart - NatureManufacture
 
   For his excellent AAA quality assets and his most awesome support
+
+  https://assetstore.unity.com/publishers/6887
 
 * Rafael Kuebler
 
