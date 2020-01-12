@@ -8,6 +8,10 @@ This repository contains custom extensions for Vegetation Studio Pro. Feel free 
 
   https://assetstore.unity.com/packages/tools/terrain/vegetation-studio-pro-131835
 
+* Vegetation Studio Pro Extensions
+
+  https://bit.ly/VegetationStudioProExtensions
+
 ## Installation
 
 * Install Vegetation Studio Pro
@@ -103,6 +107,43 @@ Custom Functions for use with Vegetation Studio Pro
 Rutime Spawn: Enable or Disable "run-time spawn" of all of the Vegetation Items of the selected Biome.
 
 ![batch-functions](https://user-images.githubusercontent.com/10963432/72217509-30ff6380-352f-11ea-8235-417559de31a7.png)
+
+## Biome Mask Spawner
+
+Please backup your project if you use Biome Mask Spawner. It is in active development and bound to get non-backwards-compatible changes depending on requirements and feedback. A documentation will follow later, here's a quick overview video of what it can do:
+
+[![Vegetation Studio Pro Extensions for Unity - Biome Mask Spawner](https://img.youtube.com/vi/n7Kzea4EPmg/0.jpg)](https://www.youtube.com/watch?v=n7Kzea4EPmg)
+
+Features
+
+* Create random Biome Masks in various shapes
+
+  * Voronoi
+  * Rectangular
+  * Hexagon
+
+* Random shape modifier allows to create randomly convex and concave masks
+ 
+* Multi-Tile-Terrain (naturally because Vegetation Studio Pro supports it)
+
+* Shape bounds variation
+
+  The bounds used for the shapes can be of the following:
+
+  * Combined Terrains
+  
+    Bounds of all terrains of your Vegetation System
+
+  * Individual Terrains
+
+    All terrains of your Vegetation System are processed individually
+
+  * Biome
+
+    Antoher Biome Mask Area defines the bounds in which the shapes are created
+
+
+More procedural spawners like Lake creation will follow in a future update.
 
 
 ## Credits
