@@ -72,7 +72,7 @@ Additional functions for Vegetation Mask Area and Biome Mask Area
 
 * Convex Hull
 
-  Get all the nodes of the mask and create a Convex Hull using them
+  Get all the nodes of the mask and create a Convex Hull using the node positons
 
 * Subdivide
 
