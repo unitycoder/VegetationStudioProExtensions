@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
-#if UNITY_EDITOR
 using UnityEditor;
-#endif
+
 
 namespace VegetationStudioProExtensions
 {
@@ -9,7 +8,45 @@ namespace VegetationStudioProExtensions
     public class MenuExtension : MonoBehaviour
     {
 
-#if UNITY_EDITOR
+
+
+        [MenuItem("GameObject/VegetationStudioPro/Add Biome Mask Spawner", false, 10)]
+        static void AddBiomeCreator(MenuCommand menuCommand)
+        {
+            // create new gameobject
+            GameObject go = new GameObject("Biome Mask Spawner");
+
+            // add this component
+            go.AddComponent<BiomeMaskSpawnerExtension>();
+
+            // ensure gameobject gets reparented if this was a context click (otherwise does nothing)
+            GameObjectUtility.SetParentAndAlign(go, menuCommand.context as GameObject);
+
+            // tegister the creation in the undo system
+            Undo.RegisterCreatedObjectUndo(go, "Create " + go.name);
+
+            Selection.activeObject = go;
+
+        }
+
+        [MenuItem("GameObject/VegetationStudioPro/Add Batch Functions", false, 10)]
+        static void AddBatchFunctions(MenuCommand menuCommand)
+        {
+            // create new gameobject
+            GameObject go = new GameObject("Batch Functions");
+
+            // add this component
+            go.AddComponent<BatchFunctions>();
+
+            // ensure gameobject gets reparented if this was a context click (otherwise does nothing)
+            GameObjectUtility.SetParentAndAlign(go, menuCommand.context as GameObject);
+
+            // tegister the creation in the undo system
+            Undo.RegisterCreatedObjectUndo(go, "Create " + go.name);
+
+            Selection.activeObject = go;
+
+        }
 
         // Add a menu item to create custom GameObjects.
         // Priority 1 ensures it is grouped with the other menu items of the same kind
@@ -77,7 +114,6 @@ namespace VegetationStudioProExtensions
 
         }
 
-#endif
 
     }
 
