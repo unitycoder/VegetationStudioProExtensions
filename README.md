@@ -152,11 +152,11 @@ More procedural spawners like Lake creation will follow in a future update.
 
 * Lennart Johansen
 
-  For Vegetation Studio Pro and his most awesome support
+  For Vegetation Studio and Vegetation Studio Pro and his most awesome support
 
 * Bart - Naturemanufacture
 
-  For his excellent assets and his most awesome support
+  For his excellent AAA quality assets and his most awesome support
 
 * Rafael Kuebler
 
