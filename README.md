@@ -76,7 +76,7 @@ Additional functions for Vegetation Mask Area and Biome Mask Area
 
 * Subdivide
 
-  Adds a new node between the nodes
+  Adds new nodes between the existing nodes
 
 * Unsubdivide
 
