@@ -102,9 +102,11 @@ Example:
 
 ## Batch Functions
 
-Custom Functions for use with Vegetation Studio Pro
+Custom Functions for use with Vegetation Studio Pro.
 
-Rutime Spawn: Enable or Disable "run-time spawn" of all of the Vegetation Items of the selected Biome.
+* Runtime Spawn 
+ 
+  Enable or Disable "run-time spawn" of all of the Vegetation Items of the selected Biome. *Note: No Undo available!*
 
 ![batch-functions](https://user-images.githubusercontent.com/10963432/72217509-30ff6380-352f-11ea-8235-417559de31a7.png)
 
@@ -114,7 +116,7 @@ Please backup your project if you use Biome Mask Spawner. It is in active develo
 
 [![Vegetation Studio Pro Extensions for Unity - Biome Mask Spawner](https://img.youtube.com/vi/n7Kzea4EPmg/0.jpg)](https://www.youtube.com/watch?v=n7Kzea4EPmg)
 
-Features
+Here are some of the features:
 
 * Create random Biome Masks in various shapes
 
@@ -140,7 +142,7 @@ Features
 
   * Biome
 
-    Antoher Biome Mask Area defines the bounds in which the shapes are created
+    Another Biome Mask Area defines the bounds in which the shapes are created
 
 
 More procedural spawners like Lake creation will follow in a future update.
@@ -148,6 +150,16 @@ More procedural spawners like Lake creation will follow in a future update.
 
 ## Credits
 
-Rafael Kuebler
+* Lennart Johansen
 
-https://github.com/RafaelKuebler/DelaunayVoronoi
+  For Vegetation Studio Pro and his most awesome support
+
+* Bart - Naturemanufacture
+
+  For his excellent assets and his most awesome support
+
+* Rafael Kuebler
+
+  For his MIT-licensed implementation of Voronoi Diagram creation
+
+  https://github.com/RafaelKuebler/DelaunayVoronoi
