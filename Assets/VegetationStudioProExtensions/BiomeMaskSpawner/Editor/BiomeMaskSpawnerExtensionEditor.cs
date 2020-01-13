@@ -67,7 +67,11 @@ namespace VegetationStudioProExtensions
         private SerializedProperty lineWidthMax;
         private SerializedProperty lineHeightMin;
         private SerializedProperty lineHeightMax;
+        private SerializedProperty lineAngleMin;
+        private SerializedProperty lineAngleMax;
         private SerializedProperty lineAttachedToBiome;
+        private SerializedProperty lineBiomeMaskArea;
+        private SerializedProperty lineAttachedAngleDelta;
 
         private static VegetationStudioManager VegetationStudioInstance;
 
@@ -142,11 +146,14 @@ namespace VegetationStudioProExtensions
             lineHeightMax = FindProperty(x => x.lineSettings.heightMax);
             lineWidthMin = FindProperty(x => x.lineSettings.widthMin);
             lineWidthMax = FindProperty(x => x.lineSettings.widthMax);
+            lineAngleMin = FindProperty(x => x.lineSettings.angleMin);
+            lineAngleMax = FindProperty(x => x.lineSettings.angleMax);
             lineAttachedToBiome = FindProperty(x => x.lineSettings.attachedToBiome);
+            lineBiomeMaskArea = FindProperty(x => x.lineSettings.biomeMaskArea);
+            lineAttachedAngleDelta  = FindProperty(x => x.lineSettings.attachedAngleDelta);
 
-
-        #region Consistency Check
-        performInitialConsistencyCheck = true;
+            #region Consistency Check
+            performInitialConsistencyCheck = true;
             #endregion Consistency Check
         }
 
@@ -325,10 +332,28 @@ namespace VegetationStudioProExtensions
                         EditorGUILayout.LabelField(new GUIContent("Line Width", "The minimum and maximum line widths"));
                         EditorGuiUtilities.MinMaxEditor("Min", ref lineWidthMin, "Max", ref lineWidthMax, 1, 100, true);
 
-                        EditorGUILayout.LabelField(new GUIContent("Line Height", "The minimum and maximum line heights"));
+                        EditorGUILayout.LabelField(new GUIContent("Line Length", "The minimum and maximum line lengths"));
                         EditorGuiUtilities.MinMaxEditor("Min", ref lineHeightMin, "Max", ref lineHeightMax, 1, 1000, true);
 
+                        EditorGUILayout.LabelField(new GUIContent("Angle", "The rotation angle limits in degrees"));
+                        EditorGuiUtilities.MinMaxEditor("Min", ref lineAngleMin, "Max", ref lineAngleMax, 0, 360, true);
+
                         EditorGUILayout.PropertyField(lineAttachedToBiome, new GUIContent("Attached to Biome", "The line is attached to the edge of an existing biome or loose on the terrain"));
+
+                        if (lineAttachedToBiome.boolValue)
+                        {
+                            EditorGUILayout.PropertyField(lineBiomeMaskArea, new GUIContent("Biome Mask", "The Biome used for line attachment."));
+
+                            // show error in case the mask doesn't exist
+                            if (lineBiomeMaskArea.objectReferenceValue == null)
+                            {
+                                EditorGUILayout.HelpBox("The Biome Mask must be defined!", MessageType.Error);
+                            }
+
+                            EditorGUILayout.PropertyField(lineAttachedAngleDelta, new GUIContent("Angle Offset", "The line is normally attached 90 degrees to the biome mask edge. This value allows for some randomness by modifying the angle +/- this value in degrees."));
+                            
+                        }
+
 
                         break;
 

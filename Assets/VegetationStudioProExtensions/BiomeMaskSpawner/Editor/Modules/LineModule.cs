@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using AwesomeTechnologies.VegetationStudio;
+using AwesomeTechnologies.VegetationSystem.Biomes;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -38,14 +40,15 @@ namespace VegetationStudioProExtensions
         /// <param name="bounds"></param>
         private void CreateMasks(Bounds bounds)
         {
-            LineSettings lineSettings = biomeMaskSpawner.extension.lineSettings;            
+            LineSettings lineSettings = biomeMaskSpawner.extension.lineSettings;
             
             for( int i=0; i < lineSettings.count; i++)
             {
-
+                // bounds
                 float width = Random.Range(lineSettings.widthMin, lineSettings.widthMax);
                 float height = Random.Range(lineSettings.heightMin, lineSettings.heightMax);
 
+                // position
                 // heuristic to make it less probable that the lines are outside the bounds
                 // however they can still be outside, e. g. because of the rotation around a point
                 // for our purpose it's acceptable
@@ -55,8 +58,30 @@ namespace VegetationStudioProExtensions
                 float x = Random.Range(bounds.min.x + offsetX, bounds.max.x - offsetX);
                 float z = Random.Range(bounds.min.z + offsetZ, bounds.max.z - offsetZ);
 
-                float angle = Random.Range(0, 360);
+                // angle
+                float angle = Random.Range(lineSettings.angleMin, lineSettings.angleMax);
 
+                // attached to biome: different position and angle
+                if (lineSettings.attachedToBiome)
+                {
+                    Vector3 biomeEdgePosition = new Vector3();
+                    float biomeAngle = 0f;
+
+                    // get data from mask
+                    GetRandomBiomeEdgePosition( out biomeEdgePosition, out biomeAngle);
+
+                    // update position
+                    x = biomeEdgePosition.x;
+                    z = biomeEdgePosition.z;
+
+                    // update angle
+                    angle = biomeAngle;
+
+                    // add a little bit of angle randomness if specified
+                    angle += Random.Range(-lineSettings.attachedAngleDelta, lineSettings.attachedAngleDelta); 
+                }
+
+                // create mask nodes
                 List<Vector3> nodes = new List<Vector3>();
 
                 nodes.Add(new Vector3(x, 0, z));
@@ -64,7 +89,14 @@ namespace VegetationStudioProExtensions
                 nodes.Add(new Vector3(x + width, 0, z + height));
                 nodes.Add(new Vector3(x, 0, z + height));
 
-                Vector3 center = nodes[0];
+                // rotate nodes around the center of the first edge
+                Vector3 fromNode = nodes[0];
+                Vector3 toNode = nodes[1];
+
+                float distance = (toNode - fromNode).magnitude;
+                Vector3 direction = (toNode - fromNode).normalized;
+
+                Vector3 center = fromNode + direction * distance * 0.5f; // center of the edge
 
                 for (int j = 0; j < nodes.Count; j++)
                 {
@@ -79,6 +111,41 @@ namespace VegetationStudioProExtensions
                 CreateBiomeMaskArea("Biome Mask " + maskId, "Mask " + maskId, position, nodes);
 
             }
+        }
+
+        /// <summary>
+        /// Get a position and angle along the biome mask's edge.
+        /// </summary>
+        /// <param name="position"></param>
+        /// <param name="angle"></param>
+        private void GetRandomBiomeEdgePosition( out Vector3 position, out float angle)
+        {
+            BiomeMaskArea mask = biomeMaskSpawner.extension.lineSettings.biomeMaskArea;
+
+            // get from node index
+            int nodeIndexFrom = Random.Range(0, mask.Nodes.Count); // int is exclusive last
+
+            // get to node index, consider overlap
+            int nodeIndexTo = nodeIndexFrom + 1;
+            if (nodeIndexTo >= mask.Nodes.Count)
+                nodeIndexTo = 0;
+
+            // get nodes
+            Vector3 positionFrom = mask.transform.position + mask.Nodes[nodeIndexFrom].Position;
+            Vector3 positionTo = mask.transform.position + mask.Nodes[nodeIndexTo].Position;
+
+            float distance = (positionTo - positionFrom).magnitude;
+            Vector3 direction = (positionTo - positionFrom).normalized;
+
+            // the position along the edge. 0=from, 0.5=center, 1=to
+            float relativePosition = Random.Range(0f, 1f);
+
+            // calculate the position
+            position = positionFrom + direction * distance * relativePosition;
+
+            // calculate the angle 90 degrees to the from-to points and convert to degrees
+            angle = Mathf.Atan2(positionTo.z - positionFrom.z, positionTo.x - positionFrom.x) * Mathf.Rad2Deg;
+
         }
 
         /// <summary>
