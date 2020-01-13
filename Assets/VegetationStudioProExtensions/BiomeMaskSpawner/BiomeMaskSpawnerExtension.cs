@@ -41,5 +41,10 @@ namespace VegetationStudioProExtensions
         /// </summary>
         public HexagonSettings hexagonSettings = new HexagonSettings();
 
+        /// <summary>
+        /// Settings for line shaped masks
+        /// </summary>
+        public LineSettings lineSettings = new LineSettings();
+
     }
 }

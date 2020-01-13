@@ -25,6 +25,7 @@ namespace VegetationStudioProExtensions
         private RectangularPartitionModule rectangularPartitionModule = null;
         private VoronoiModule voronoiModule = null;
         private HexagonModule hexagonModule = null;
+        private LineModule lineModule = null;
 
         private SerializedProperty biomeType;
         private SerializedProperty biomeBlendDistanceMin;
@@ -61,6 +62,13 @@ namespace VegetationStudioProExtensions
         private SerializedProperty voronoiPointCount;
         private SerializedProperty hexagonRadius;
 
+        private SerializedProperty lineCount;
+        private SerializedProperty lineWidthMin;
+        private SerializedProperty lineWidthMax;
+        private SerializedProperty lineHeightMin;
+        private SerializedProperty lineHeightMax;
+        private SerializedProperty lineAttachedToBiome;
+
         private static VegetationStudioManager VegetationStudioInstance;
 
         /// <summary>
@@ -83,6 +91,7 @@ namespace VegetationStudioProExtensions
             rectangularPartitionModule = new RectangularPartitionModule(this);
             voronoiModule = new VoronoiModule(this);
             hexagonModule = new HexagonModule(this);
+            lineModule = new LineModule(this);
 
             // biomes
             biomeType = FindProperty(x => x.biomeSettings.biomeType);
@@ -127,8 +136,17 @@ namespace VegetationStudioProExtensions
             // hexagon
             hexagonRadius = FindProperty(x => x.hexagonSettings.radius);
 
-            #region Consistency Check
-            performInitialConsistencyCheck = true;
+            // line
+            lineCount = FindProperty(x => x.lineSettings.count);
+            lineHeightMin = FindProperty(x => x.lineSettings.heightMin);
+            lineHeightMax = FindProperty(x => x.lineSettings.heightMax);
+            lineWidthMin = FindProperty(x => x.lineSettings.widthMin);
+            lineWidthMax = FindProperty(x => x.lineSettings.widthMax);
+            lineAttachedToBiome = FindProperty(x => x.lineSettings.attachedToBiome);
+
+
+        #region Consistency Check
+        performInitialConsistencyCheck = true;
             #endregion Consistency Check
         }
 
@@ -296,6 +314,24 @@ namespace VegetationStudioProExtensions
 
                         break;
 
+                    case PartitionAlgorithm.Line:
+
+                        EditorGUILayout.Space();
+
+                        EditorGUILayout.LabelField("Lines", GUIStyles.GroupTitleStyle);
+
+                        EditorGUILayout.PropertyField(lineCount, new GUIContent("Count", "The number of lines to add."));
+
+                        EditorGUILayout.LabelField(new GUIContent("Line Width", "The minimum and maximum line widths"));
+                        EditorGuiUtilities.MinMaxEditor("Min", ref lineWidthMin, "Max", ref lineWidthMax, 1, 100, true);
+
+                        EditorGUILayout.LabelField(new GUIContent("Line Height", "The minimum and maximum line heights"));
+                        EditorGuiUtilities.MinMaxEditor("Min", ref lineHeightMin, "Max", ref lineHeightMax, 1, 1000, true);
+
+                        EditorGUILayout.PropertyField(lineAttachedToBiome, new GUIContent("Attached to Biome", "The line is attached to the edge of an existing biome or loose on the terrain"));
+
+                        break;
+
                     default:
                         throw new System.ArgumentException("Unsupported Partition Algorithm " + extension.boundsSettings.partitionAlgorithm);
                 }
@@ -412,6 +448,10 @@ namespace VegetationStudioProExtensions
 
                 case PartitionAlgorithm.Hexagon:
                     hexagonModule.CreateMasks(boundsList);
+                    break;
+
+                case PartitionAlgorithm.Line:
+                    lineModule.CreateMasks(boundsList);
                     break;
 
                 default:

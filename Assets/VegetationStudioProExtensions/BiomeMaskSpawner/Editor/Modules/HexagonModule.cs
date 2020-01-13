@@ -19,7 +19,10 @@ namespace VegetationStudioProExtensions
             this.biomeMaskSpawner = biomeMaskSpawner;
         }
 
-
+        /// <summary>
+        /// Create Biome masks for the specified bounds list
+        /// </summary>
+        /// <param name="boundsList"></param>
         public void CreateMasks(List<Bounds> boundsList)
         {
             foreach (Bounds bounds in boundsList)
@@ -42,9 +45,9 @@ namespace VegetationStudioProExtensions
         }
 
         /// <summary>
-        /// Create Biome masks for the specified bounds list
+        /// Create Biome masks for the specified bounds
         /// </summary>
-        /// <param name="boundsList"></param>
+        /// <param name="bounds"></param>
         private void CreateMasks(Bounds bounds)
         {
             float outerRadius = GetOuterRadius(bounds);

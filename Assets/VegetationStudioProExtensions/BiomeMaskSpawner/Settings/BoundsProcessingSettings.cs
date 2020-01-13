@@ -14,7 +14,8 @@ namespace VegetationStudioProExtensions
         {
             Voronoi,
             Rectangular,  
-            Hexagon
+            Hexagon,
+            Line
         }
 
         [Serializable]
