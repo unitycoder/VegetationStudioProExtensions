@@ -78,7 +78,8 @@ namespace VegetationStudioProExtensions
                     angle = biomeAngle;
 
                     // add a little bit of angle randomness if specified
-                    angle += Random.Range(-lineSettings.attachedAngleDelta, lineSettings.attachedAngleDelta); 
+                    angle += Random.Range(-lineSettings.attachedAngleDelta, lineSettings.attachedAngleDelta);
+                    
                 }
 
                 // create mask nodes
@@ -122,8 +123,24 @@ namespace VegetationStudioProExtensions
         {
             BiomeMaskArea mask = biomeMaskSpawner.extension.lineSettings.biomeMaskArea;
 
+            // parameter consistency check
+            if(mask == null)
+            {
+                Debug.LogError("No mask defined");
+
+                position = Vector3.zero;
+                angle = 0;
+                return;
+            }
+
+            List<Vector3> positions = BiomeMaskUtils.GetPositions(mask);
+
+            // sort clockwise, so that the pick algorithm works
+            // if this were counterclockwise, then the angle would make the lines face inwards
+            PolygonUtils.SortClockWise(positions);
+
             // get from node index
-            int nodeIndexFrom = Random.Range(0, mask.Nodes.Count); // int is exclusive last
+            int nodeIndexFrom = Random.Range(0, positions.Count); // note: int is exclusive last
 
             // get to node index, consider overlap
             int nodeIndexTo = nodeIndexFrom + 1;
@@ -131,8 +148,18 @@ namespace VegetationStudioProExtensions
                 nodeIndexTo = 0;
 
             // get nodes
-            Vector3 positionFrom = mask.transform.position + mask.Nodes[nodeIndexFrom].Position;
-            Vector3 positionTo = mask.transform.position + mask.Nodes[nodeIndexTo].Position;
+            Vector3 positionFrom = mask.transform.position + positions[nodeIndexFrom];
+            Vector3 positionTo = mask.transform.position + positions[nodeIndexTo];
+
+            // having the lines flip inwards into the biome is just a matter of changing the access order of the nodes
+            // leaving this here, maybe we find a use case later
+            bool flipAngle = biomeMaskSpawner.extension.lineSettings.attachedAngleFlip;
+            if ( flipAngle)
+            {
+                Vector3 tmp = positionFrom;
+                positionFrom = positionTo;
+                positionTo = tmp;
+            }
 
             float distance = (positionTo - positionFrom).magnitude;
             Vector3 direction = (positionTo - positionFrom).normalized;

@@ -224,5 +224,15 @@ namespace VegetationStudioProExtensions
             // center main handle, implicitly updates the mask
             CenterMainHandle(mask);
         }
+
+        /// <summary>
+        /// Create a list of node positions.
+        /// </summary>
+        /// <param name="mask"></param>
+        /// <returns></returns>
+        public static List<Vector3> GetPositions( BiomeMaskArea mask)
+        {
+            return mask.Nodes.ConvertAll<Vector3>(item => new Vector3(item.Position.x, item.Position.y, item.Position.z));
+        }
     }
 }

@@ -57,5 +57,10 @@ namespace VegetationStudioProExtensions
         /// The line is normally attached 90 degrees to the biome mask edge. This value allows for some randomness by modifying the angle +/- this value in degrees.
         /// </summary>
         public float attachedAngleDelta = 20f;
+
+        /// <summary>
+        /// If active, then the lines will be drawn inwards, into the biome.
+        /// </summary>
+        public bool attachedAngleFlip = false;
     }
 }

@@ -72,6 +72,7 @@ namespace VegetationStudioProExtensions
         private SerializedProperty lineAttachedToBiome;
         private SerializedProperty lineBiomeMaskArea;
         private SerializedProperty lineAttachedAngleDelta;
+        private SerializedProperty lineAttachedAngleFlip;
 
         private static VegetationStudioManager VegetationStudioInstance;
 
@@ -150,7 +151,8 @@ namespace VegetationStudioProExtensions
             lineAngleMax = FindProperty(x => x.lineSettings.angleMax);
             lineAttachedToBiome = FindProperty(x => x.lineSettings.attachedToBiome);
             lineBiomeMaskArea = FindProperty(x => x.lineSettings.biomeMaskArea);
-            lineAttachedAngleDelta  = FindProperty(x => x.lineSettings.attachedAngleDelta);
+            lineAttachedAngleDelta = FindProperty(x => x.lineSettings.attachedAngleDelta);
+            lineAttachedAngleFlip = FindProperty(x => x.lineSettings.attachedAngleFlip);
 
             #region Consistency Check
             performInitialConsistencyCheck = true;
@@ -358,6 +360,8 @@ namespace VegetationStudioProExtensions
 
                             EditorGUILayout.PropertyField(lineAttachedAngleDelta, new GUIContent("Angle Offset", "The line is normally attached 90 degrees to the biome mask edge. This value allows for some randomness by modifying the angle +/- this value in degrees."));
                             
+                            EditorGUILayout.PropertyField(lineAttachedAngleFlip, new GUIContent("Inwards", "If active, then the lines will be drawn inwards, into the biome."));
+
                         }
 
 
