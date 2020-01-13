@@ -329,6 +329,12 @@ namespace VegetationStudioProExtensions
 
                         EditorGUILayout.PropertyField(lineCount, new GUIContent("Count", "The number of lines to add."));
 
+                        // keep the count value >= 0
+                        if(lineCount.intValue < 0)
+                        {
+                            lineCount.intValue = 0;
+                        }
+
                         EditorGUILayout.LabelField(new GUIContent("Line Width", "The minimum and maximum line widths"));
                         EditorGuiUtilities.MinMaxEditor("Min", ref lineWidthMin, "Max", ref lineWidthMax, 1, 100, true);
 
@@ -364,34 +370,52 @@ namespace VegetationStudioProExtensions
                 //
                 // Shape
                 //
-                EditorGUILayout.Space();
-
-                EditorGUILayout.LabelField("Shape", GUIStyles.GroupTitleStyle);
+                switch (selectedPartitionAlgorithm)
                 {
 
-                    EditorGUILayout.PropertyField(randomShape, new GUIContent("Random Shape", "If selected, create the mask as a random shape inside the bounding box. If unselected, use the bounding box as mask."));
-
-                    if (randomShape.boolValue)
-                    {
-                        EditorGUILayout.Space();
-
-                        EditorGUILayout.PropertyField(keepOriginalPoints, new GUIContent("Keep Original Points", "Keep the original points in case of a subdivision algorithm."));
-
-                        EditorGUILayout.LabelField(new GUIContent("Convexity", "Relative value to randomly move the shape bounds towards the center, within the original bounds."));
-                        EditorGuiUtilities.MinMaxEditor("Min", ref convexityMin, "Max", ref convexityMax, 0f, 1f, true);
-
-                        EditorGUILayout.PropertyField(douglasPeuckerReductionTolerance, new GUIContent("Node Reduction Tolerance", "Douglas Peucker node reduction tolerance. 0 = disabled."));
-
-                        // only values >= 0 allowed
-                        douglasPeuckerReductionTolerance.floatValue = Utils.ClipMin(douglasPeuckerReductionTolerance.floatValue, 0f);
+                    case PartitionAlgorithm.Voronoi:
+                    case PartitionAlgorithm.Rectangular:
+                    case PartitionAlgorithm.Hexagon:
 
                         EditorGUILayout.Space();
 
-                        EditorGUILayout.LabelField(new GUIContent("Polygon Points Count", "The number of points on the polygon."));
-                        EditorGuiUtilities.MinMaxEditorInt("Min", ref randomPointsCountMin, "Max", ref randomPointsCountMax, 3, 60, true);
+                        EditorGUILayout.LabelField("Shape", GUIStyles.GroupTitleStyle);
+                        {
 
-                    }
+                            EditorGUILayout.PropertyField(randomShape, new GUIContent("Random Shape", "If selected, create the mask as a random shape inside the bounding box. If unselected, use the bounding box as mask."));
+
+                            if (randomShape.boolValue)
+                            {
+                                EditorGUILayout.Space();
+
+                                EditorGUILayout.PropertyField(keepOriginalPoints, new GUIContent("Keep Original Points", "Keep the original points in case of a subdivision algorithm."));
+
+                                EditorGUILayout.LabelField(new GUIContent("Convexity", "Relative value to randomly move the shape bounds towards the center, within the original bounds."));
+                                EditorGuiUtilities.MinMaxEditor("Min", ref convexityMin, "Max", ref convexityMax, 0f, 1f, true);
+
+                                EditorGUILayout.PropertyField(douglasPeuckerReductionTolerance, new GUIContent("Node Reduction Tolerance", "Douglas Peucker node reduction tolerance. 0 = disabled."));
+
+                                // only values >= 0 allowed
+                                douglasPeuckerReductionTolerance.floatValue = Utils.ClipMin(douglasPeuckerReductionTolerance.floatValue, 0f);
+
+                                EditorGUILayout.Space();
+
+                                EditorGUILayout.LabelField(new GUIContent("Polygon Points Count", "The number of points on the polygon."));
+                                EditorGuiUtilities.MinMaxEditorInt("Min", ref randomPointsCountMin, "Max", ref randomPointsCountMax, 3, 60, true);
+
+                            }
+                        }
+                        break;
+
+                    case PartitionAlgorithm.Line:
+                        // line doesn't have shape
+                        break;
+
+                    default:
+                        throw new System.ArgumentException("Unsupported Partition Algorithm " + extension.boundsSettings.partitionAlgorithm);
                 }
+
+
 
                 //
                 // creation buttons

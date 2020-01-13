@@ -31,7 +31,7 @@ namespace VegetationStudioProExtensions
         /// <summary>
         /// The maximum line height
         /// </summary>
-        public float heightMax = 100;
+        public float heightMax = 200;
 
         /// <summary>
         /// The minimum angle in degrees
