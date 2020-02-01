@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using SutherlandHodgmanAlgorithm;
+using UnityEditor;
 
 namespace VegetationStudioProExtensions
 {
@@ -12,11 +13,30 @@ namespace VegetationStudioProExtensions
     //    + proper calculation of the hexagon size in x and z direction (needs proper positioning instead of starting at the center)
     public class HexagonModule
     {
-        private BiomeMaskSpawnerExtensionEditor biomeMaskSpawner;
+        private SerializedProperty hexagonRadius;
 
-        public HexagonModule(BiomeMaskSpawnerExtensionEditor biomeMaskSpawner)
+        private BiomeMaskSpawnerExtensionEditor editor;
+
+        public HexagonModule(BiomeMaskSpawnerExtensionEditor editor)
         {
-            this.biomeMaskSpawner = biomeMaskSpawner;
+            this.editor = editor;
+        }
+
+        public void OnEnable()
+        {
+            hexagonRadius = editor.FindProperty(x => x.hexagonSettings.radius);
+        }
+
+        public void OnInspectorGUI()
+        {
+
+            EditorGUILayout.Space();
+
+            EditorGUILayout.LabelField("Hexagon", GUIStyles.GroupTitleStyle);
+
+            EditorGUILayout.PropertyField(hexagonRadius, new GUIContent("Radius", "The outer radius of a hexagon"));
+
+            hexagonRadius.floatValue = Utils.ClipMin(hexagonRadius.floatValue, 10f);
         }
 
         /// <summary>
@@ -36,7 +56,7 @@ namespace VegetationStudioProExtensions
 
         private float GetOuterRadius(Bounds bounds)
         {
-            return biomeMaskSpawner.extension.hexagonSettings.radius;
+            return editor.extension.hexagonSettings.radius;
         }
 
         private float GetInnerRadius(float outerRadius)
@@ -53,9 +73,9 @@ namespace VegetationStudioProExtensions
             float outerRadius = GetOuterRadius(bounds);
 
             // bounds for clipping
-            Vector2[] clipPolygon = biomeMaskSpawner.GetBiomeClipPolygon(bounds);
+            Vector2[] clipPolygon = editor.GetBiomeClipPolygon(bounds);
 
-            float density = biomeMaskSpawner.extension.biomeSettings.density;
+            float density = editor.extension.biomeSettings.density;
 
             List<Vector3> positions = GetPositions(bounds);
 
@@ -79,20 +99,20 @@ namespace VegetationStudioProExtensions
                 // convert back to vector3
                 hexagon = clippedPoints.Select(item => new Vector3(item.x, 0, item.y)).ToArray();
 
-                int maskId = biomeMaskSpawner.GetNextMaskId();
+                int maskId = editor.GetNextMaskId();
 
                 List<Vector3> nodes = hexagon.OfType<Vector3>().ToList();
 
                 // apply random shape if requested
-                if (biomeMaskSpawner.extension.shapeSettings.randomShape)
+                if (editor.extension.shapeSettings.randomShape)
                 {
 
                     nodes = ShapeCreator.CreateRandomShape(nodes, //
-                        biomeMaskSpawner.extension.shapeSettings.RandomConvexity, //
-                        biomeMaskSpawner.extension.shapeSettings.keepOriginalPoints, //
-                        biomeMaskSpawner.extension.shapeSettings.RandomPointsCount, //
-                        biomeMaskSpawner.extension.shapeSettings.randomAngle, //
-                        biomeMaskSpawner.extension.shapeSettings.douglasPeuckerReductionTolerance);
+                        editor.extension.shapeSettings.RandomConvexity, //
+                        editor.extension.shapeSettings.keepOriginalPoints, //
+                        editor.extension.shapeSettings.RandomPointsCount, //
+                        editor.extension.shapeSettings.randomAngle, //
+                        editor.extension.shapeSettings.douglasPeuckerReductionTolerance);
                 }
 
                 CreateBiomeMaskArea("Biome Mask " + maskId, "Mask " + maskId, position, nodes);
@@ -151,8 +171,8 @@ namespace VegetationStudioProExtensions
         /// <param name="nodes"></param>
         private void CreateBiomeMaskArea(string gameObjectName, string maskName, Vector3 position, List<Vector3> nodes)
         {
-            float blendDistanceMin = biomeMaskSpawner.extension.biomeSettings.biomeBlendDistanceMin;
-            float blendDistanceMax = biomeMaskSpawner.extension.biomeSettings.biomeBlendDistanceMax;
+            float blendDistanceMin = editor.extension.biomeSettings.biomeBlendDistanceMin;
+            float blendDistanceMax = editor.extension.biomeSettings.biomeBlendDistanceMax;
 
             float biomeBlendDistance = UnityEngine.Random.Range(blendDistanceMin, blendDistanceMax);
 
@@ -162,7 +182,7 @@ namespace VegetationStudioProExtensions
             float blendDistance = meanVector.magnitude / 2f * biomeBlendDistance;
 
             // create the mask using the provided parameters
-            biomeMaskSpawner.CreateBiomeMaskArea(gameObjectName, maskName, position, nodes, blendDistance);
+            editor.CreateBiomeMaskArea(gameObjectName, maskName, position, nodes, blendDistance);
 
         }
     }

@@ -122,6 +122,34 @@ namespace VegetationStudioProExtensions
             return GetMeanVector(positions.ToArray());
         }
 
+
+        /// <summary>
+        /// Resize a polygon by a factor. 
+        /// </summary>
+        /// <param name="positions"></param>
+        /// <param name="resizeFactor"></param>
+        /// <returns></returns>        
+        public static List<Vector3> Resize(List<Vector3> positions, float resizeFactor)
+        {
+            Vector3 center = GetMeanVector( positions);
+
+            List<Vector3> newPositions = new List<Vector3>();
+
+            foreach (Vector3 position in positions)
+            {
+
+                //Vector3 distance = position - center;
+                float distance = (position - center).magnitude;
+                Vector3 direction = (position - center).normalized;
+
+                Vector3 newPosition = center + direction * distance * resizeFactor;
+
+                newPositions.Add(newPosition);
+            }
+
+            return newPositions;
+        }
+
         /// <summary>
         /// Subdivide the given polygon
         /// </summary>

@@ -8,13 +8,12 @@ namespace VegetationStudioProExtensions
     public class LakeSettings
     {
 
-#if RAM_2019
-
         /// <summary>
         /// Create a RAM 2019 lake
         /// </summary>
         public bool createLake = false;
 
+#if RAM_2019
 
         /// <summary>
         /// The lake profile to use

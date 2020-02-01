@@ -4,23 +4,43 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using UnityEditor;
 
 namespace VegetationStudioProExtensions
 {
     public class VoronoiModule
     {
-        private BiomeMaskSpawnerExtensionEditor biomeMaskSpwaner;
+        private SerializedProperty voronoiPointCount;
 
-        public VoronoiModule(BiomeMaskSpawnerExtensionEditor biomeMaskSpawner)
+        private BiomeMaskSpawnerExtensionEditor editor;
+
+        public VoronoiModule(BiomeMaskSpawnerExtensionEditor editor)
         {
-            this.biomeMaskSpwaner = biomeMaskSpawner;
+            this.editor = editor;
+        }
+
+        public void OnEnable()
+        {
+            voronoiPointCount = editor.FindProperty(x => x.voronoiSettings.pointCount);
+
+        }
+
+        public void OnInspectorGUI()
+        {
+            EditorGUILayout.Space();
+
+            EditorGUILayout.LabelField("Voronoi", GUIStyles.GroupTitleStyle);
+
+            EditorGUILayout.PropertyField(voronoiPointCount, new GUIContent("Points", "The number of Points which will be used to create the Voronoi diagram"));
+
+            voronoiPointCount.intValue = Utils.ClipMin(voronoiPointCount.intValue, 2);
         }
 
         public void CreateMasks(List<Bounds> boundsList)
         {
             foreach (Bounds bounds in boundsList)
             {
-                int pointCount = biomeMaskSpwaner.extension.voronoiSettings.pointCount;
+                int pointCount = editor.extension.voronoiSettings.pointCount;
 
                 // create masks
                 CreateMasks(bounds, pointCount);
@@ -55,12 +75,12 @@ namespace VegetationStudioProExtensions
             graph.CreateGraph();
 
             // bounds for clipping
-            Vector2[] clipPolygon = biomeMaskSpwaner.GetBiomeClipPolygon(bounds);
+            Vector2[] clipPolygon = editor.GetBiomeClipPolygon(bounds);
 
             // normalize clip polygon, shift to [0/0]
             Vector2[] offsetClipPolygon = clipPolygon.Select(item => new Vector2(item.x - xmin, item.y - zmin)).ToArray();
 
-            float density = biomeMaskSpwaner.extension.biomeSettings.density;
+            float density = editor.extension.biomeSettings.density;
 
             for (int i = 0; i < pointCount; i++)
             {
@@ -70,7 +90,7 @@ namespace VegetationStudioProExtensions
                     continue;
                 }
 
-                int maskId = biomeMaskSpwaner.GetNextMaskId();
+                int maskId = editor.GetNextMaskId();
 
                 // get cell, clip it at the clip polygon
                 Cell cell = graph.GetVoronoiCell( i, offsetClipPolygon);
@@ -85,15 +105,15 @@ namespace VegetationStudioProExtensions
                 List<Vector3> nodes = cell.Vertices.Select(item => new Vector3(item.x + xmin, 0, item.y + zmin)).ToList();
 
                 // apply random shape if requested
-                if (biomeMaskSpwaner.extension.shapeSettings.randomShape)
+                if (editor.extension.shapeSettings.randomShape)
                 {
 
                     nodes = ShapeCreator.CreateRandomShape(nodes, //
-                        biomeMaskSpwaner.extension.shapeSettings.RandomConvexity, //
-                        biomeMaskSpwaner.extension.shapeSettings.keepOriginalPoints, //
-                        biomeMaskSpwaner.extension.shapeSettings.RandomPointsCount, //
-                        biomeMaskSpwaner.extension.shapeSettings.randomAngle, //
-                        biomeMaskSpwaner.extension.shapeSettings.douglasPeuckerReductionTolerance);
+                        editor.extension.shapeSettings.RandomConvexity, //
+                        editor.extension.shapeSettings.keepOriginalPoints, //
+                        editor.extension.shapeSettings.RandomPointsCount, //
+                        editor.extension.shapeSettings.randomAngle, //
+                        editor.extension.shapeSettings.douglasPeuckerReductionTolerance);
                 }
 
                 CreateBiomeMaskArea("Biome Mask " + maskId, "Mask " + maskId, position, nodes);
@@ -111,8 +131,8 @@ namespace VegetationStudioProExtensions
         /// <param name="nodes"></param>
         private void CreateBiomeMaskArea(string gameObjectName, string maskName, Vector3 position, List<Vector3> nodes)
         {
-            float blendDistanceMin = biomeMaskSpwaner.extension.biomeSettings.biomeBlendDistanceMin;
-            float blendDistanceMax = biomeMaskSpwaner.extension.biomeSettings.biomeBlendDistanceMax;
+            float blendDistanceMin = editor.extension.biomeSettings.biomeBlendDistanceMin;
+            float blendDistanceMax = editor.extension.biomeSettings.biomeBlendDistanceMax;
 
             float biomeBlendDistance = UnityEngine.Random.Range(blendDistanceMin, blendDistanceMax);
 
@@ -122,7 +142,7 @@ namespace VegetationStudioProExtensions
             float blendDistance = meanVector.magnitude / 2f * biomeBlendDistance;
 
             // create the mask using the provided parameters
-            biomeMaskSpwaner.CreateBiomeMaskArea(gameObjectName, maskName, position, nodes, blendDistance);
+            editor.CreateBiomeMaskArea(gameObjectName, maskName, position, nodes, blendDistance);
 
         }
 

@@ -2,6 +2,7 @@
 using AwesomeTechnologies.VegetationSystem.Biomes;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 namespace VegetationStudioProExtensions
@@ -13,11 +14,80 @@ namespace VegetationStudioProExtensions
     /// </summary>
     public class LineModule
     {
-        private BiomeMaskSpawnerExtensionEditor biomeMaskSpawner;
+        private SerializedProperty lineCount;
+        private SerializedProperty lineWidthMin;
+        private SerializedProperty lineWidthMax;
+        private SerializedProperty lineHeightMin;
+        private SerializedProperty lineHeightMax;
+        private SerializedProperty lineAngleMin;
+        private SerializedProperty lineAngleMax;
+        private SerializedProperty lineAttachedToBiome;
+        private SerializedProperty lineBiomeMaskArea;
+        private SerializedProperty lineAttachedAngleDelta;
+        private SerializedProperty lineAttachedAngleFlip;
 
-        public LineModule(BiomeMaskSpawnerExtensionEditor biomeMaskSpawner)
+        private BiomeMaskSpawnerExtensionEditor editor;
+
+        public LineModule(BiomeMaskSpawnerExtensionEditor editor)
         {
-            this.biomeMaskSpawner = biomeMaskSpawner;
+            this.editor = editor;
+        }
+
+        public void OnEnable()
+        {
+            lineCount = editor.FindProperty(x => x.lineSettings.count);
+            lineHeightMin = editor.FindProperty(x => x.lineSettings.heightMin);
+            lineHeightMax = editor.FindProperty(x => x.lineSettings.heightMax);
+            lineWidthMin = editor.FindProperty(x => x.lineSettings.widthMin);
+            lineWidthMax = editor.FindProperty(x => x.lineSettings.widthMax);
+            lineAngleMin = editor.FindProperty(x => x.lineSettings.angleMin);
+            lineAngleMax = editor.FindProperty(x => x.lineSettings.angleMax);
+            lineAttachedToBiome = editor.FindProperty(x => x.lineSettings.attachedToBiome);
+            lineBiomeMaskArea = editor.FindProperty(x => x.lineSettings.biomeMaskArea);
+            lineAttachedAngleDelta = editor.FindProperty(x => x.lineSettings.attachedAngleDelta);
+            lineAttachedAngleFlip = editor.FindProperty(x => x.lineSettings.attachedAngleFlip);
+        }
+
+        public void OnInspectorGUI()
+        {
+            EditorGUILayout.Space();
+
+            EditorGUILayout.LabelField("Lines", GUIStyles.GroupTitleStyle);
+
+            EditorGUILayout.PropertyField(lineCount, new GUIContent("Count", "The number of lines to add."));
+
+            // keep the count value >= 0
+            if (lineCount.intValue < 0)
+            {
+                lineCount.intValue = 0;
+            }
+
+            EditorGUILayout.LabelField(new GUIContent("Line Width", "The minimum and maximum line widths"));
+            EditorGuiUtilities.MinMaxEditor("Min", ref lineWidthMin, "Max", ref lineWidthMax, 1, 100, true);
+
+            EditorGUILayout.LabelField(new GUIContent("Line Length", "The minimum and maximum line lengths"));
+            EditorGuiUtilities.MinMaxEditor("Min", ref lineHeightMin, "Max", ref lineHeightMax, 1, 1000, true);
+
+            EditorGUILayout.LabelField(new GUIContent("Angle", "The rotation angle limits in degrees"));
+            EditorGuiUtilities.MinMaxEditor("Min", ref lineAngleMin, "Max", ref lineAngleMax, 0, 360, true);
+
+            EditorGUILayout.PropertyField(lineAttachedToBiome, new GUIContent("Attached to Biome", "The line is attached to the edge of an existing biome or loose on the terrain"));
+
+            if (lineAttachedToBiome.boolValue)
+            {
+                EditorGUILayout.PropertyField(lineBiomeMaskArea, new GUIContent("Biome Mask", "The Biome used for line attachment."));
+
+                // show error in case the mask doesn't exist
+                if (lineBiomeMaskArea.objectReferenceValue == null)
+                {
+                    EditorGUILayout.HelpBox("The Biome Mask must be defined!", MessageType.Error);
+                }
+
+                EditorGUILayout.PropertyField(lineAttachedAngleDelta, new GUIContent("Angle Offset", "The line is normally attached 90 degrees to the biome mask edge. This value allows for some randomness by modifying the angle +/- this value in degrees."));
+
+                EditorGUILayout.PropertyField(lineAttachedAngleFlip, new GUIContent("Inwards", "If active, then the lines will be drawn inwards, into the biome."));
+
+            }
         }
 
         /// <summary>
@@ -40,7 +110,7 @@ namespace VegetationStudioProExtensions
         /// <param name="bounds"></param>
         private void CreateMasks(Bounds bounds)
         {
-            LineSettings lineSettings = biomeMaskSpawner.extension.lineSettings;
+            LineSettings lineSettings = editor.extension.lineSettings;
             
             for( int i=0; i < lineSettings.count; i++)
             {
@@ -108,7 +178,7 @@ namespace VegetationStudioProExtensions
 
                 Vector3 position = new Vector3(x, 0, z);
 
-                int maskId = biomeMaskSpawner.GetNextMaskId();
+                int maskId = editor.GetNextMaskId();
                 CreateBiomeMaskArea("Biome Mask " + maskId, "Mask " + maskId, position, nodes);
 
             }
@@ -121,7 +191,7 @@ namespace VegetationStudioProExtensions
         /// <param name="angle"></param>
         private void GetRandomBiomeEdgePosition( out Vector3 position, out float angle)
         {
-            BiomeMaskArea mask = biomeMaskSpawner.extension.lineSettings.biomeMaskArea;
+            BiomeMaskArea mask = editor.extension.lineSettings.biomeMaskArea;
 
             // parameter consistency check
             if(mask == null)
@@ -153,7 +223,7 @@ namespace VegetationStudioProExtensions
 
             // having the lines flip inwards into the biome is just a matter of changing the access order of the nodes
             // leaving this here, maybe we find a use case later
-            bool flipAngle = biomeMaskSpawner.extension.lineSettings.attachedAngleFlip;
+            bool flipAngle = editor.extension.lineSettings.attachedAngleFlip;
             if ( flipAngle)
             {
                 Vector3 tmp = positionFrom;
@@ -185,8 +255,8 @@ namespace VegetationStudioProExtensions
         /// <param name="nodes"></param>
         private void CreateBiomeMaskArea(string gameObjectName, string maskName, Vector3 position, List<Vector3> nodes)
         {
-            float blendDistanceMin = biomeMaskSpawner.extension.biomeSettings.biomeBlendDistanceMin;
-            float blendDistanceMax = biomeMaskSpawner.extension.biomeSettings.biomeBlendDistanceMax;
+            float blendDistanceMin = editor.extension.biomeSettings.biomeBlendDistanceMin;
+            float blendDistanceMax = editor.extension.biomeSettings.biomeBlendDistanceMax;
 
             float biomeBlendDistance = UnityEngine.Random.Range(blendDistanceMin, blendDistanceMax);
 
@@ -196,7 +266,7 @@ namespace VegetationStudioProExtensions
             float blendDistance = meanVector.magnitude / 2f * biomeBlendDistance;
 
             // create the mask using the provided parameters
-            biomeMaskSpawner.CreateBiomeMaskArea(gameObjectName, maskName, position, nodes, blendDistance);
+            editor.CreateBiomeMaskArea(gameObjectName, maskName, position, nodes, blendDistance);
 
         }
     }

@@ -54,6 +54,12 @@ namespace VegetationStudioProExtensions
         public float douglasPeuckerReductionTolerance = 0f;
 
         /// <summary>
+        /// A resize factor which allows you to grow or shrink the mask.
+        /// </summary>
+        [Range(0.5f,1.5f)]
+        public float resizeFactor = 1.0f;
+
+        /// <summary>
         /// Get a random relaxation value which is between the min and max bounds.
         /// </summary>
         public int RandomPointsCount

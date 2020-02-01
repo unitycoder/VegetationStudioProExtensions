@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 using UnityEngine;
 using static VegetationStudioProExtensions.RectangularPartitionSettings;
 using static VegetationStudioProExtensions.ShapeSettings;
@@ -26,13 +27,42 @@ namespace VegetationStudioProExtensions
             Vertical
         }
 
-        private BiomeMaskSpawnerExtensionEditor biomeMaskSpawner;
+        private SerializedProperty partitionStrategy;
+        private SerializedProperty biomeCount;
+        private SerializedProperty boundsShiftFactorMin;
+        private SerializedProperty boundsShiftFactorMax;
 
-        public RectangularPartitionModule(BiomeMaskSpawnerExtensionEditor biomeMaskSpawner)
+        private BiomeMaskSpawnerExtensionEditor editor;
+
+        public RectangularPartitionModule(BiomeMaskSpawnerExtensionEditor editor)
         {
-            this.biomeMaskSpawner = biomeMaskSpawner;
+            this.editor = editor;
         }
 
+        public void OnEnable()
+        {
+            partitionStrategy = editor.FindProperty(x => x.rectangularPartitionSettings.partitionStrategy);
+            biomeCount = editor.FindProperty(x => x.rectangularPartitionSettings.biomeCount);
+            boundsShiftFactorMin = editor.FindProperty(x => x.rectangularPartitionSettings.boundsShiftFactorMin);
+            boundsShiftFactorMax = editor.FindProperty(x => x.rectangularPartitionSettings.boundsShiftFactorMax);
+        }
+
+        public void OnInspectorGUI()
+        {
+            EditorGUILayout.Space();
+
+            EditorGUILayout.LabelField("Partitions", GUIStyles.GroupTitleStyle);
+
+            EditorGUILayout.PropertyField(biomeCount, new GUIContent("Biome Count", "The number of Biomes the terrain should have when full density is selected"));
+
+            // consistency check: never allow the number of partitions to be smaller than 1
+            biomeCount.intValue = Utils.ClipMin(biomeCount.intValue, 2);
+
+            EditorGUILayout.PropertyField(partitionStrategy, new GUIContent("Split Strategy", "The strategy to select the terraiin segments which should be partitioned."));
+
+            EditorGUILayout.LabelField(new GUIContent("Partition Shift", "Relative factor to shift and resize the partition bounds within its bounds. Makes the partitions look less rectangularly distributed. Reduces the size."));
+            EditorGuiUtilities.MinMaxEditor("Min", ref boundsShiftFactorMin, "Max", ref boundsShiftFactorMax, 0.1f, 1f, true);
+        }
 
         public void CreateMasks(List<Bounds> boundsList)
         {
@@ -53,7 +83,7 @@ namespace VegetationStudioProExtensions
             for (int i = 0; i < steps; i++)
             {
                 // pick next bounds object from the list
-                int index = GetNextSegmentIndex(boundsSegments, biomeMaskSpawner.extension.rectangularPartitionSettings.partitionStrategy);
+                int index = GetNextSegmentIndex(boundsSegments, editor.extension.rectangularPartitionSettings.partitionStrategy);
 
                 Bounds bounds = boundsSegments[index];
 
@@ -194,9 +224,9 @@ namespace VegetationStudioProExtensions
         private void CreateMasks(Bounds bounds)
         {
             // for 2 biomes we need to split the terrain once. for n biomes we need to split it n-1 times
-            int partitionCount = biomeMaskSpawner.extension.rectangularPartitionSettings.biomeCount - 1;
+            int partitionCount = editor.extension.rectangularPartitionSettings.biomeCount - 1;
 
-            float density = biomeMaskSpawner.extension.biomeSettings.density;
+            float density = editor.extension.biomeSettings.density;
 
             List<Bounds> boundsList = Subdivide(bounds, partitionCount);
             for (int i = 0; i < boundsList.Count; i++)
@@ -207,7 +237,7 @@ namespace VegetationStudioProExtensions
                     continue;
                 }
 
-                int maskId = biomeMaskSpawner.GetNextMaskId();
+                int maskId = editor.GetNextMaskId();
 
                 Bounds boundsSegment = boundsList[i];
 
@@ -219,14 +249,14 @@ namespace VegetationStudioProExtensions
         private void CreateBiomeMaskArea(string gameObjectName, string maskName, Bounds bounds)
         {
             // modify bounds, reduce its rectangular distribution
-            float minFactor = biomeMaskSpawner.extension.rectangularPartitionSettings.boundsShiftFactorMin;
-            float maxFactor = biomeMaskSpawner.extension.rectangularPartitionSettings.boundsShiftFactorMax;
+            float minFactor = editor.extension.rectangularPartitionSettings.boundsShiftFactorMin;
+            float maxFactor = editor.extension.rectangularPartitionSettings.boundsShiftFactorMax;
 
             bounds = PolygonUtils.ShiftResizeBounds(bounds, minFactor, maxFactor);
 
             List<Vector3> nodes;
 
-            if (biomeMaskSpawner.extension.shapeSettings.randomShape)
+            if (editor.extension.shapeSettings.randomShape)
             {
                 // old mechanism: convex hull
                 // nodes = ShapeCreator.CreateRandomShapeUsingConvexHull(bounds, randomPointCount);
@@ -234,11 +264,11 @@ namespace VegetationStudioProExtensions
                 // new mechanism: random shape with parameters like convexity
                 nodes = ShapeCreator.CreateRandomShape(
                             ShapeCreator.CreateRectangularBoundsShape(bounds),
-                            biomeMaskSpawner.extension.shapeSettings.RandomConvexity, //
-                            biomeMaskSpawner.extension.shapeSettings.keepOriginalPoints, //
-                            biomeMaskSpawner.extension.shapeSettings.RandomPointsCount, //
-                            biomeMaskSpawner.extension.shapeSettings.randomAngle, //
-                            biomeMaskSpawner.extension.shapeSettings.douglasPeuckerReductionTolerance);
+                            editor.extension.shapeSettings.RandomConvexity, //
+                            editor.extension.shapeSettings.keepOriginalPoints, //
+                            editor.extension.shapeSettings.RandomPointsCount, //
+                            editor.extension.shapeSettings.randomAngle, //
+                            editor.extension.shapeSettings.douglasPeuckerReductionTolerance);
             }
             // exact bounds
             else
@@ -250,7 +280,7 @@ namespace VegetationStudioProExtensions
 
 
             // bounds for clipping
-            Vector2[] clipPolygon = biomeMaskSpawner.GetBiomeClipPolygon(bounds);
+            Vector2[] clipPolygon = editor.GetBiomeClipPolygon(bounds);
 
             // clip, convert to vector2
             Vector2[] polygonXY = nodes.Select(item => new Vector2(item.x, item.z)).ToArray();
@@ -271,14 +301,14 @@ namespace VegetationStudioProExtensions
         {
 
 
-            float blendDistanceMin = biomeMaskSpawner.extension.biomeSettings.biomeBlendDistanceMin;
-            float blendDistanceMax = biomeMaskSpawner.extension.biomeSettings.biomeBlendDistanceMax;
+            float blendDistanceMin = editor.extension.biomeSettings.biomeBlendDistanceMin;
+            float blendDistanceMax = editor.extension.biomeSettings.biomeBlendDistanceMax;
 
             float biomeBlendDistance = UnityEngine.Random.Range(blendDistanceMin, blendDistanceMax);
             float blendDistance = bounds.extents.magnitude / 2f * biomeBlendDistance;
 
             // create the mask using the provided parameters
-            biomeMaskSpawner.CreateBiomeMaskArea(gameObjectName, maskName, bounds.center, nodes, blendDistance);
+            editor.CreateBiomeMaskArea(gameObjectName, maskName, bounds.center, nodes, blendDistance);
 
         }
     }
