@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
-using static VegetationStudioProExtensions.BoundsProcessingSettings;
+using static VegetationStudioProExtensions.ProcessingSettings;
 
 namespace VegetationStudioProExtensions
 {

@@ -6,7 +6,7 @@ using AwesomeTechnologies.VegetationSystem;
 using AwesomeTechnologies.VegetationSystem.Biomes;
 using System.Collections.Generic;
 using static VegetationStudioProExtensions.ShapeSettings;
-using static VegetationStudioProExtensions.BoundsProcessingSettings;
+using static VegetationStudioProExtensions.ProcessingSettings;
 
 namespace VegetationStudioProExtensions
 {
@@ -35,6 +35,7 @@ namespace VegetationStudioProExtensions
         private ShapeModule shapeModule = null;
         private BiomeModule biomeModule = null;
         private ProcessingModule processingModule = null;
+        private RiverModule riverModule = null;
 
         private static VegetationStudioManager VegetationStudioInstance;
 
@@ -60,6 +61,7 @@ namespace VegetationStudioProExtensions
             shapeModule = new ShapeModule(this);
             biomeModule = new BiomeModule(this);
             processingModule = new ProcessingModule(this);
+            riverModule = new RiverModule(this);
 
             #endregion module instantiation
 
@@ -73,6 +75,7 @@ namespace VegetationStudioProExtensions
             voronoiModule.OnEnable();
             hexagonModule.OnEnable();
             lineModule.OnEnable();
+            riverModule.OnEnable();
 
             #endregion module OnEnable
 
@@ -135,6 +138,10 @@ namespace VegetationStudioProExtensions
                         lineModule.OnInspectorGUI();
                         break;
 
+                    case PartitionAlgorithm.River:
+                        riverModule.OnInspectorGUI();
+                        break;
+
                     default:
                         throw new System.ArgumentException("Unsupported Partition Algorithm " + extension.boundsSettings.partitionAlgorithm);
                 }
@@ -152,7 +159,8 @@ namespace VegetationStudioProExtensions
                         break;
 
                     case PartitionAlgorithm.Line:
-                        // line doesn't have shape
+                    case PartitionAlgorithm.River:
+                        // algorithm doesn't have a shape
                         break;
 
                     default:
@@ -245,6 +253,10 @@ namespace VegetationStudioProExtensions
 
                 case PartitionAlgorithm.Line:
                     lineModule.CreateMasks(boundsList);
+                    break;
+
+                case PartitionAlgorithm.River:
+                    riverModule.CreateMasks(boundsList);
                     break;
 
                 default:
@@ -453,6 +465,13 @@ namespace VegetationStudioProExtensions
         {
             GameObject container = extension.transform.gameObject as GameObject;
 
+            // Workaround for a RAM bug: Simulated meshes don't get removed after the spline got deleted => we delete them manually
+            // TODO: remove after RAM gameobject deletion got fixed
+            if ( processingModule.GetSelectedPartitionAlgorithm() == PartitionAlgorithm.River)
+            {
+                RiverModule.RemoveRiverSimulationMeshes(container);
+            }
+
             // register undo
             Undo.RegisterFullObjectHierarchyUndo(container, "Remove " + container);
 
@@ -539,7 +558,7 @@ namespace VegetationStudioProExtensions
             Vector2[] clipPolygon = PolygonUtils.CreatePolygonXZ(bounds);
 
             // optionally use a biome as clip polygon. default is bounds
-            if ( extension.boundsSettings.boundsProcessing == BoundsProcessingSettings.BoundsProcessing.Biome)
+            if ( extension.boundsSettings.boundsProcessing == ProcessingSettings.BoundsProcessing.Biome)
             {
 
                 Vector2[] biomeClipPolygon = GetBiomeClipPolygon();

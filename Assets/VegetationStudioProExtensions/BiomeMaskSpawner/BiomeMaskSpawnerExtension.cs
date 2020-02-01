@@ -24,7 +24,7 @@ namespace VegetationStudioProExtensions
         /// <summary>
         /// Which bounds to process: all terrains as one combined, every terrain individually
         /// </summary>
-        public BoundsProcessingSettings boundsSettings = new BoundsProcessingSettings();
+        public ProcessingSettings boundsSettings = new ProcessingSettings();
 
         /// <summary>
         /// Settings for rectangular terrain partitioning
@@ -45,6 +45,11 @@ namespace VegetationStudioProExtensions
         /// Settings for line shaped masks
         /// </summary>
         public LineSettings lineSettings = new LineSettings();
+
+        /// <summary>
+        /// Settings for the River creation.
+        /// </summary>
+        public RiverSettings riverSettings = new RiverSettings();
 
     }
 }
