@@ -5,7 +5,7 @@ using UnityEditor;
 
 namespace VegetationStudioProExtensions
 {
-    public class RiverModule : MonoBehaviour
+    public class RiverModule
     {
 #if RAM_2019
         private SerializedProperty riverCount;

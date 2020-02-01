@@ -36,6 +36,7 @@ namespace VegetationStudioProExtensions
         private BiomeModule biomeModule = null;
         private ProcessingModule processingModule = null;
         private RiverModule riverModule = null;
+        private RoadModule roadModule = null;
 
         private static VegetationStudioManager VegetationStudioInstance;
 
@@ -62,6 +63,7 @@ namespace VegetationStudioProExtensions
             biomeModule = new BiomeModule(this);
             processingModule = new ProcessingModule(this);
             riverModule = new RiverModule(this);
+            roadModule = new RoadModule(this);
 
             #endregion module instantiation
 
@@ -76,11 +78,12 @@ namespace VegetationStudioProExtensions
             hexagonModule.OnEnable();
             lineModule.OnEnable();
             riverModule.OnEnable();
+            roadModule.OnEnable();
 
             #endregion module OnEnable
 
             #region Consistency Check
-            
+
             performInitialConsistencyCheck = true;
 
             #endregion Consistency Check
@@ -124,14 +127,17 @@ namespace VegetationStudioProExtensions
                 {
                     case PartitionAlgorithm.Voronoi:
                         voronoiModule.OnInspectorGUI();
+                        shapeModule.OnInspectorGUI();
                         break;
 
                     case PartitionAlgorithm.Rectangular:
                         rectangularPartitionModule.OnInspectorGUI();
+                        shapeModule.OnInspectorGUI();
                         break;
 
                     case PartitionAlgorithm.Hexagon:
                         hexagonModule.OnInspectorGUI();
+                        shapeModule.OnInspectorGUI();
                         break;
 
                     case PartitionAlgorithm.Line:
@@ -142,32 +148,15 @@ namespace VegetationStudioProExtensions
                         riverModule.OnInspectorGUI();
                         break;
 
-                    default:
-                        throw new System.ArgumentException("Unsupported Partition Algorithm " + extension.boundsSettings.partitionAlgorithm);
-                }
-
-                //
-                // Shape
-                //
-                switch (selectedPartitionAlgorithm)
-                {
-
-                    case PartitionAlgorithm.Voronoi:
-                    case PartitionAlgorithm.Rectangular:
-                    case PartitionAlgorithm.Hexagon:
+                    case PartitionAlgorithm.Road:
+                        roadModule.OnInspectorGUI();
+                        voronoiModule.OnInspectorGUI();
                         shapeModule.OnInspectorGUI();
                         break;
 
-                    case PartitionAlgorithm.Line:
-                    case PartitionAlgorithm.River:
-                        // algorithm doesn't have a shape
-                        break;
-
                     default:
                         throw new System.ArgumentException("Unsupported Partition Algorithm " + extension.boundsSettings.partitionAlgorithm);
                 }
-
-
 
                 //
                 // creation buttons
@@ -257,6 +246,10 @@ namespace VegetationStudioProExtensions
 
                 case PartitionAlgorithm.River:
                     riverModule.CreateMasks(boundsList);
+                    break;
+
+                case PartitionAlgorithm.Road:
+                    roadModule.CreateMasks(boundsList);
                     break;
 
                 default:

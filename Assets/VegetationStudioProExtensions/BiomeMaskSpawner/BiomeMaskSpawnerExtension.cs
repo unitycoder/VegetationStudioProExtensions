@@ -51,5 +51,10 @@ namespace VegetationStudioProExtensions
         /// </summary>
         public RiverSettings riverSettings = new RiverSettings();
 
+        /// <summary>
+        /// Settings for the Road creation.
+        /// </summary>
+        public RoadSettings roadSettings = new RoadSettings();
+
     }
 }

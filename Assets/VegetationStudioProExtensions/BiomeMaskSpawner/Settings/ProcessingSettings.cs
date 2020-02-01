@@ -16,7 +16,8 @@ namespace VegetationStudioProExtensions
             Rectangular,  
             Hexagon,
             Line,
-            River
+            River,
+            Road
         }
 
         [Serializable]
