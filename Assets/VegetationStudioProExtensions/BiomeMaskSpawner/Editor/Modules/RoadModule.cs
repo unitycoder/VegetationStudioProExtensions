@@ -18,6 +18,8 @@ namespace VegetationStudioProExtensions
         private SerializedProperty smoothEnabled;
         private SerializedProperty closedTrack;
         private SerializedProperty minDistance;
+        private SerializedProperty autoPlaceGameObject;
+        private SerializedProperty placementGameObject;
 
         private BiomeMaskSpawnerExtensionEditor editor;
 #if EASY_ROADS
@@ -38,6 +40,8 @@ namespace VegetationStudioProExtensions
             smoothEnabled = editor.FindProperty(x => x.roadSettings.smoothEnabled);
             closedTrack = editor.FindProperty(x => x.roadSettings.closedTrack);
             minDistance = editor.FindProperty(x => x.roadSettings.minDistance);
+            autoPlaceGameObject = editor.FindProperty(x => x.roadSettings.autoPlaceGameObject);
+            placementGameObject = editor.FindProperty(x => x.roadSettings.placementGameObject);
 
 #if EASY_ROADS
             // create a reference to the road network in the scene
@@ -95,6 +99,20 @@ namespace VegetationStudioProExtensions
             EditorGUILayout.PropertyField(smoothEnabled, new GUIContent("Smooth", "Perform smoothing on the polygon"));
             EditorGUILayout.PropertyField(closedTrack, new GUIContent("Closed Track", "Set the Closed Track setting of the road"));
             EditorGUILayout.PropertyField(minDistance, new GUIContent("Min. Node Distance", "Minimum distance between nodes. Use this to remove close curve jitter"));
+
+            EditorGUILayout.PropertyField(autoPlaceGameObject, new GUIContent("Auto Placement", "Automatically place a GameObject on the road"));
+            if(autoPlaceGameObject.boolValue)
+            {
+                if (placementGameObject.objectReferenceValue == null)
+                {
+                    editor.SetErrorBackgroundColor();
+                }
+
+                EditorGUILayout.PropertyField(placementGameObject, new GUIContent("Placement GameObject", "The GameObject to place automatically."));
+
+                editor.SetDefaultBackgroundColor();
+            }
+
 #else
             EditorGUILayout.HelpBox("Requires Easy Roads installed and 'EASY_ROADS' Scripting Define Symbol", MessageType.Error);
 
@@ -105,6 +123,7 @@ namespace VegetationStudioProExtensions
         {
 #if EASY_ROADS
             CreateRoads( boundsList);
+            AutoPlaceGameObject();
 #endif
         }
 
@@ -399,7 +418,56 @@ namespace VegetationStudioProExtensions
 
             return nl;
         }
-#endif
-#endregion Easy Roads Code
+
+        /// <summary>
+        /// Place a gameobject on the road at marker 0 looking at marker 1
+        /// </summary>
+        private void AutoPlaceGameObject()
+        {
+
+            if (!editor.extension.roadSettings.autoPlaceGameObject)
+                return;
+
+            if( editor.extension.roadSettings.placementGameObject == null)
+            {
+                Debug.LogError("No GameObject specified");
+                return;
+            }
+
+            ERRoadNetwork erRoadNetwork = new ERRoadNetwork();
+            ERRoad erRoad = erRoadNetwork.GetRoadByGameObject(editor.extension.roadSettings.road);
+
+            if (erRoad == null)
+            {
+                Debug.LogError("No road gameobject specified");
+                return;
+            }
+
+            if (erRoad.GetMarkerCount() < 2)
+            {
+                Debug.LogError("At least 2 markers required");
+                return;
+            }
+
+            GameObject gameObject = editor.extension.roadSettings.placementGameObject;
+
+            // get marker with index 0 and 1
+            Vector3 positionA = erRoad.GetMarkerPosition(0);
+            Vector3 positionB = erRoad.GetMarkerPosition(1);
+
+            Bounds prefabBounds = BoundsUtils.GetPrefabBounds(gameObject);
+
+            // position at marker position
+            gameObject.transform.position = positionA;
+
+            // look at 2nd marker
+            gameObject.transform.LookAt(positionB);
+
         }
+
+
+
+#endif
+        #endregion Easy Roads Code
+    }
 }
