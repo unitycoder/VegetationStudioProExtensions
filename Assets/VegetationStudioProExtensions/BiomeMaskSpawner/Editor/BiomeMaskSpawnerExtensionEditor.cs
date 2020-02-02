@@ -20,25 +20,27 @@ namespace VegetationStudioProExtensions
         /// </summary>
         private int maskId = -1;
 
-        /// <summary>
-        /// The factor for growing or shrinking.
-        /// </summary>
-        private float resizeFactor = 0.05f;
-
         public BiomeMaskSpawnerExtension extension;
 
-        private RectangularPartitionModule rectangularPartitionModule = null;
-        private VoronoiModule voronoiModule = null;
-        private HexagonModule hexagonModule = null;
-        private LineModule lineModule = null;
-        private LakeModule lakeModule = null;
-        private ShapeModule shapeModule = null;
-        private BiomeModule biomeModule = null;
-        private ProcessingModule processingModule = null;
-        private RiverModule riverModule = null;
-        private RoadModule roadModule = null;
+        #region settings modules
+        public RectangularPartitionModule rectangularPartitionModule = null;
+        public VoronoiModule voronoiModule = null;
+        public HexagonModule hexagonModule = null;
+        public LineModule lineModule = null;
+        public LakeModule lakeModule = null;
+        public ShapeModule shapeModule = null;
+        public BiomeModule biomeModule = null;
+        public ProcessingModule processingModule = null;
+        public RiverModule riverModule = null;
+        public RoadModule roadModule = null;
+        #endregion settings modules
 
-        private static VegetationStudioManager VegetationStudioInstance;
+        #region action modules
+        public MaskCreationActionModule maskCreationActionModule = null;
+        public RoadCreationActionModule roadCreationActionModule = null;
+        #endregion action modules
+
+        public static VegetationStudioManager VegetationStudioInstance;
 
         private BiomeMaskSpawnerExtensionEditor editor;
 
@@ -52,8 +54,7 @@ namespace VegetationStudioProExtensions
 
             extension = (BiomeMaskSpawnerExtension)target;
 
-            #region module instantiation
-
+            #region settings modules
             rectangularPartitionModule = new RectangularPartitionModule(this);
             voronoiModule = new VoronoiModule(this);
             hexagonModule = new HexagonModule(this);
@@ -64,8 +65,12 @@ namespace VegetationStudioProExtensions
             processingModule = new ProcessingModule(this);
             riverModule = new RiverModule(this);
             roadModule = new RoadModule(this);
+            #endregion settings modules
 
-            #endregion module instantiation
+            #region action modules
+            maskCreationActionModule = new MaskCreationActionModule(this);
+            roadCreationActionModule = new RoadCreationActionModule(this);
+            #endregion action modules
 
             #region module OnEnable
 
@@ -158,57 +163,25 @@ namespace VegetationStudioProExtensions
                         throw new System.ArgumentException("Unsupported Partition Algorithm " + extension.boundsSettings.partitionAlgorithm);
                 }
 
-                //
-                // creation buttons
-                //
-                EditorGUILayout.Space();
 
-                EditorGUILayout.LabelField("Creation", GUIStyles.GroupTitleStyle);
-
-                GUILayout.BeginHorizontal();
+                // action buttons
+                switch (selectedPartitionAlgorithm)
                 {
+                    case PartitionAlgorithm.Voronoi:
+                    case PartitionAlgorithm.Rectangular:
+                    case PartitionAlgorithm.Hexagon:
+                    case PartitionAlgorithm.Line:
+                    case PartitionAlgorithm.River:
+                        maskCreationActionModule.OnInspectorGUI();
+                        break;
 
-                    // create biome mask
-                    if (GUILayout.Button("Clear & Add"))
-                    {
-                        ResetMaskId();
-                        RemoveContainerChildren();
-                        PartitionTerrain();
-                    }
-                    else if (GUILayout.Button("Clear"))
-                    {
-                        ResetMaskId();
-                        RemoveContainerChildren();
-                    }
-                    else if (GUILayout.Button("Add"))
-                    {
-                        PartitionTerrain();
-                    }
+                    case PartitionAlgorithm.Road:
+                        roadCreationActionModule.OnInspectorGUI();
+                        break;
 
+                    default:
+                        throw new System.ArgumentException("Unsupported Partition Algorithm " + extension.boundsSettings.partitionAlgorithm);
                 }
-                GUILayout.EndHorizontal();
-
-                //
-                // modification
-                //
-                EditorGUILayout.Space();
-
-                EditorGUILayout.LabelField("Modification", GUIStyles.GroupTitleStyle);
-
-                GUILayout.BeginHorizontal();
-                {
-
-                    if (GUILayout.Button("Grow All"))
-                    {
-                        GrowAll();
-                    }
-                    else if (GUILayout.Button("Shrink All"))
-                    {
-                        ShrinkAll();
-                    }
-
-                }
-                GUILayout.EndHorizontal();
 
             }
             GUILayout.EndVertical();
@@ -220,50 +193,13 @@ namespace VegetationStudioProExtensions
             performInitialConsistencyCheck = false;
         }
 
-        private void PartitionTerrain()
-        {
-            // get bounds for terrain partitioning
-            List<Bounds> boundsList = GetBoundsToProcess();
 
-            // perform partitioning and create masks
-            switch (extension.boundsSettings.partitionAlgorithm)
-            {
-                case PartitionAlgorithm.Voronoi:
-                    voronoiModule.CreateMasks(boundsList);
-                    break;
-
-                case PartitionAlgorithm.Rectangular:
-                    rectangularPartitionModule.CreateMasks(boundsList);
-                    break;
-
-                case PartitionAlgorithm.Hexagon:
-                    hexagonModule.CreateMasks(boundsList);
-                    break;
-
-                case PartitionAlgorithm.Line:
-                    lineModule.CreateMasks(boundsList);
-                    break;
-
-                case PartitionAlgorithm.River:
-                    riverModule.CreateMasks(boundsList);
-                    break;
-
-                case PartitionAlgorithm.Road:
-                    roadModule.CreateMasks(boundsList);
-                    break;
-
-                default:
-                    throw new System.ArgumentException("Unsupported Partition Algorithm " + extension.boundsSettings.partitionAlgorithm);
-            }
-
-            RefreshTerrainHeightmap();
-        }
 
         /// <summary>
         /// Create a list of bounds to process. Either all terrains combined or individually
         /// </summary>
         /// <returns></returns>
-        private List<Bounds> GetBoundsToProcess()
+        public List<Bounds> GetBoundsToProcess()
         {
             List<Bounds> boundsList = new List<Bounds>();
 
@@ -338,17 +274,7 @@ namespace VegetationStudioProExtensions
             VegetationStudioInstance = (VegetationStudioManager)FindObjectOfType(typeof(VegetationStudioManager));
         }
 
-        public void RefreshTerrainHeightmap()
-        {
-            List<VegetationSystemPro> VegetationSystemList = VegetationStudioInstance.VegetationSystemList;
-
-            for (int i = 0; i <= VegetationSystemList.Count - 1; i++)
-            {
-                VegetationSystemList[i].RefreshTerrainHeightmap();
-            }
-        }
-
-        private void ResetMaskId()
+        public void ResetMaskId()
         {
             maskId = -1;
         }
@@ -451,64 +377,7 @@ namespace VegetationStudioProExtensions
             Undo.RegisterCreatedObjectUndo(go, "Create " + go.name);
         }
 
-        /// <summary>
-        /// Remove all children of the Biome Creator
-        /// </summary>
-        public void RemoveContainerChildren()
-        {
-            GameObject container = extension.transform.gameObject as GameObject;
 
-            // Workaround for a RAM bug: Simulated meshes don't get removed after the spline got deleted => we delete them manually
-            // TODO: remove after RAM gameobject deletion got fixed
-            if ( processingModule.GetSelectedPartitionAlgorithm() == PartitionAlgorithm.River)
-            {
-                RiverModule.RemoveRiverSimulationMeshes(container);
-            }
-
-            // register undo
-            Undo.RegisterFullObjectHierarchyUndo(container, "Remove " + container);
-
-            List<Transform> list = new List<Transform>();
-            foreach (Transform child in container.transform)
-            {
-                list.Add(child);
-            }
-
-            foreach (Transform child in list)
-            {
-                GameObject go = child.gameObject;
-
-                BiomeMaskSpawnerExtensionEditor.DestroyImmediate(go);
-
-            }
-
-
-        }
-
-        private void GrowAll()
-        {
-            // get all biome mask area gameobjects of this gameobject
-            GameObject parentGo = extension.transform.gameObject;
-            BiomeMaskArea[] masks = parentGo.GetComponentsInChildren<BiomeMaskArea>();
-
-            foreach (BiomeMaskArea mask in masks)
-            {
-                BiomeMaskUtils.Grow(mask, resizeFactor);
-            }
-
-        }
-
-        private void ShrinkAll()
-        {
-            // get all biome mask area gameobjects of this gameobject
-            GameObject parentGo = extension.transform.gameObject;
-            BiomeMaskArea[] masks = parentGo.GetComponentsInChildren<BiomeMaskArea>();
-
-            foreach (BiomeMaskArea mask in masks)
-            {
-                BiomeMaskUtils.Shrink(mask, resizeFactor);
-            }
-        }
 
         /// <summary>
         /// If bounds clip setting is set to biome, get the clip polygon from it

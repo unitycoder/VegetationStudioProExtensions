@@ -108,9 +108,16 @@ namespace VegetationStudioProExtensions
 #endif
         }
 
-#region Easy Roads Code
+        public void Clear()
+        {
 #if EASY_ROADS
-        private void Clear()
+            ClearRoad();
+#endif
+        }
+
+        #region Easy Roads Code
+#if EASY_ROADS
+        public void ClearRoad()
         {
             erRoad = erRoadNetwork.GetRoadByGameObject(road.objectReferenceValue as GameObject);
 
@@ -121,7 +128,7 @@ namespace VegetationStudioProExtensions
             }
 
             // the mask didn't get refreshed with the road, it stayed the old one => according to raoul this helps:
-            // Object.DestroyImmediate(erRoad.gameObject.GetComponent<AwesomeTechnologies.VegetationMaskLine>());
+            Object.DestroyImmediate(erRoad.gameObject.GetComponent<AwesomeTechnologies.VegetationMaskLine>()); 
 
             // delete all markers
             // TODO: find out how to do that properly
