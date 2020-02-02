@@ -38,6 +38,7 @@ namespace VegetationStudioProExtensions
         #region action modules
         public MaskCreationActionModule maskCreationActionModule = null;
         public RoadCreationActionModule roadCreationActionModule = null;
+        public VegetationStudioProActionModule vegetationStudioProActionModule = null;
         #endregion action modules
 
         public static VegetationStudioManager VegetationStudioInstance;
@@ -50,7 +51,7 @@ namespace VegetationStudioProExtensions
         {
             this.editor = this;
 
-            FindVegetationStudioInstance();
+            VegetationStudioInstance = VegetationStudioProUtils.FindVegetationStudioInstance();
 
             extension = (BiomeMaskSpawnerExtension)target;
 
@@ -70,6 +71,7 @@ namespace VegetationStudioProExtensions
             #region action modules
             maskCreationActionModule = new MaskCreationActionModule(this);
             roadCreationActionModule = new RoadCreationActionModule(this);
+            vegetationStudioProActionModule = new VegetationStudioProActionModule(this);
             #endregion action modules
 
             #region module OnEnable
@@ -173,10 +175,12 @@ namespace VegetationStudioProExtensions
                     case PartitionAlgorithm.Line:
                     case PartitionAlgorithm.River:
                         maskCreationActionModule.OnInspectorGUI();
+                        vegetationStudioProActionModule.OnInspectorGUI();
                         break;
 
                     case PartitionAlgorithm.Road:
                         roadCreationActionModule.OnInspectorGUI();
+                        vegetationStudioProActionModule.OnInspectorGUI();
                         break;
 
                     default:
@@ -267,11 +271,6 @@ namespace VegetationStudioProExtensions
             }
 
             return boundsList;
-        }
-
-        protected static void FindVegetationStudioInstance()
-        {
-            VegetationStudioInstance = (VegetationStudioManager)FindObjectOfType(typeof(VegetationStudioManager));
         }
 
         public void ResetMaskId()

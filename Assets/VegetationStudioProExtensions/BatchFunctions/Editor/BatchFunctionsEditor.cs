@@ -23,7 +23,7 @@ namespace VegetationStudioProExtensions
 
         public void OnEnable()
         {
-            FindVegetationStudioInstance();
+            VegetationStudioInstance = VegetationStudioProUtils.FindVegetationStudioInstance();
 
             extension = (BatchFunctions)target;
 
@@ -106,24 +106,10 @@ namespace VegetationStudioProExtensions
                     EditorUtility.SetDirty(vegetationPackagePro);
                 }
 
-                SetSceneDirty(vegetationSystemPro);
+                VegetationStudioProUtils.SetSceneDirty(vegetationSystemPro);
             }
         }
 
-        
-        void SetSceneDirty(VegetationSystemPro vegetationSystemPro)
-        {
-            if (!Application.isPlaying)
-            {
-                EditorSceneManager.MarkSceneDirty(vegetationSystemPro.gameObject.scene);
-                EditorUtility.SetDirty(vegetationSystemPro);
-            }
-        }
-        
 
-        protected static void FindVegetationStudioInstance()
-        {
-            VegetationStudioInstance = (VegetationStudioManager)FindObjectOfType(typeof(VegetationStudioManager));
-        }
     }
 }
