@@ -12,7 +12,7 @@ namespace VegetationStudioProExtensions
     /// No clipping is performed, the shapes are intended to be just some thin forest lines for details.
     /// No biome intersection check is performed, might be more natural this way.
     /// </summary>
-    public class LineModule
+    public class LineModule : ISettingsModule
     {
         private SerializedProperty lineCount;
         private SerializedProperty lineWidthMin;

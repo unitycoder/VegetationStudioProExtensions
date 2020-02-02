@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace VegetationStudioProExtensions
 {
-    public class ShapeModule
+    public class ShapeModule : ISettingsModule
     {
         private SerializedProperty randomShape;
         private SerializedProperty randomPointsCount;

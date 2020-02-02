@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace VegetationStudioProExtensions
 {
-    public class LakeModule
+    public class LakeModule : ISettingsModule
     {
         private SerializedProperty lakeCreateLake;
 

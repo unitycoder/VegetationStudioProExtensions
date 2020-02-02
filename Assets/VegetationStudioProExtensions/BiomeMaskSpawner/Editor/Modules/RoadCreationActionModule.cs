@@ -6,7 +6,7 @@ using static VegetationStudioProExtensions.ProcessingSettings;
 
 namespace VegetationStudioProExtensions
 {
-    public class RoadCreationActionModule
+    public class RoadCreationActionModule : IActionModule
     {
         private BiomeMaskSpawnerExtensionEditor editor;
 

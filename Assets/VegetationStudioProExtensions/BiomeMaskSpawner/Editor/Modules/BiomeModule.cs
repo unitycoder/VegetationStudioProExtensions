@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace VegetationStudioProExtensions
 {
-    public class BiomeModule
+    public class BiomeModule : ISettingsModule
     {
         private SerializedProperty biomeType;
         private SerializedProperty biomeBlendDistanceMin;

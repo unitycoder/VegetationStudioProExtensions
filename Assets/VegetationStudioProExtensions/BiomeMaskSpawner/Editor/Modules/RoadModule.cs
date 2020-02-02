@@ -11,7 +11,7 @@ using EasyRoads3Dv3;
 
 namespace VegetationStudioProExtensions
 {
-    public class RoadModule
+    public class RoadModule : ISettingsModule
     {
         private SerializedProperty biomeMaskArea;
         private SerializedProperty road;

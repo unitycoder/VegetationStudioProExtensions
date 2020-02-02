@@ -11,7 +11,7 @@ namespace VegetationStudioProExtensions
     // TODO:
     //    + individual distribution needs clipping
     //    + proper calculation of the hexagon size in x and z direction (needs proper positioning instead of starting at the center)
-    public class HexagonModule
+    public class HexagonModule : ISettingsModule
     {
         private SerializedProperty hexagonRadius;
 

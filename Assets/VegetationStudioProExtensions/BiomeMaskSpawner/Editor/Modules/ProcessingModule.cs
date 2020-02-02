@@ -7,7 +7,7 @@ using static VegetationStudioProExtensions.ProcessingSettings;
 
 namespace VegetationStudioProExtensions
 {
-    public class ProcessingModule
+    public class ProcessingModule : ISettingsModule
     {
         private SerializedProperty terrainProcessing;
         private SerializedProperty boundsBiomeMaskArea;

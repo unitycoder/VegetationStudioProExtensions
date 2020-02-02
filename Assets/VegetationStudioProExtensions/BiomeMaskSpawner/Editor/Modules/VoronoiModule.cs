@@ -8,7 +8,7 @@ using UnityEditor;
 
 namespace VegetationStudioProExtensions
 {
-    public class VoronoiModule
+    public class VoronoiModule : ISettingsModule
     {
         private SerializedProperty voronoiPointCount;
 

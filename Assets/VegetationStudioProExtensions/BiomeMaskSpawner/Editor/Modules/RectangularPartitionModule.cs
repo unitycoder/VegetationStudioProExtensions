@@ -9,7 +9,7 @@ using static VegetationStudioProExtensions.ShapeSettings;
 
 namespace VegetationStudioProExtensions
 {
-    public class RectangularPartitionModule
+    public class RectangularPartitionModule : ISettingsModule
     {
         /// <summary>
         /// A subdivision is usually performed at position 50%. This value allows you to modify the split position. 

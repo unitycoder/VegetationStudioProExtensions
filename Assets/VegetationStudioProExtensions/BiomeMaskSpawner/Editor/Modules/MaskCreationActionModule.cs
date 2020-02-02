@@ -8,7 +8,7 @@ using static VegetationStudioProExtensions.ProcessingSettings;
 
 namespace VegetationStudioProExtensions
 {
-    public class MaskCreationActionModule
+    public class MaskCreationActionModule : IActionModule
     {
 
         /// <summary>
