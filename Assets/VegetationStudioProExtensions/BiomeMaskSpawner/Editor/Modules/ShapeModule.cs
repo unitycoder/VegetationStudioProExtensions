@@ -66,7 +66,7 @@ namespace VegetationStudioProExtensions
                     EditorGUILayout.Space();
 
                     EditorGUILayout.LabelField(new GUIContent("Polygon Points Count", "The number of points on the polygon."));
-                    EditorGuiUtilities.MinMaxEditorInt("Min", ref randomPointsCountMin, "Max", ref randomPointsCountMax, 3, 60, true);
+                    EditorGuiUtilities.MinMaxEditorInt("Min", ref randomPointsCountMin, "Max", ref randomPointsCountMax, 3, 200, true);
 
                 }
             }

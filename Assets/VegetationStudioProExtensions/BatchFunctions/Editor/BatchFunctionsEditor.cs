@@ -5,6 +5,7 @@ using UnityEditor;
 using AwesomeTechnologies.VegetationSystem;
 using UnityEditor.SceneManagement;
 using AwesomeTechnologies.VegetationStudio;
+using AwesomeTechnologies.TerrainSystem;
 
 namespace VegetationStudioProExtensions
 {
@@ -71,6 +72,25 @@ namespace VegetationStudioProExtensions
             }
             GUILayout.EndVertical();
 
+            GUILayout.BeginVertical("box");
+            {
+                EditorGUILayout.Space();
+
+                EditorGUILayout.LabelField("Quick Access", GUIStyles.GroupTitleStyle);
+                {
+                    GUILayout.BeginHorizontal();
+                    {
+                        if (GUILayout.Button("Generate Biome SplatMaps"))
+                        {
+                            GenerateBiomeSplatMaps();
+                        }
+
+                    }
+                    GUILayout.EndHorizontal();
+                }
+            }
+            GUILayout.EndVertical();
+
             serializedObject.ApplyModifiedProperties();
         }
 
@@ -110,6 +130,17 @@ namespace VegetationStudioProExtensions
             }
         }
 
-
+        /// <summary>
+        /// Generate all biome splatmaps
+        /// </summary>
+        private void GenerateBiomeSplatMaps()
+        {
+            TerrainSystemPro[] terrainSystemProList = FindObjectsOfType<TerrainSystemPro>();
+            foreach(TerrainSystemPro terrainSystemPro in terrainSystemProList)
+            {
+                terrainSystemPro.GenerateSplatMap(false);
+                terrainSystemPro.ShowTerrainHeatmap(false);
+            }
+        }
     }
 }
