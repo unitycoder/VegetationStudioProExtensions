@@ -129,6 +129,7 @@ namespace VegetationStudioProExtensions
 
         private void CreateMasks(Bounds bounds)
         {
+#if RAM_2019
             RiverSettings riverSettings = editor.extension.riverSettings;
 
             for (int i = 0; i < riverSettings.count; i++)
@@ -154,6 +155,7 @@ namespace VegetationStudioProExtensions
                 CreateRiver("River " + maskId, position);
 
             }
+#endif
         }
 
         public void CreateRiver(string gameObjectName, Vector3 position)
