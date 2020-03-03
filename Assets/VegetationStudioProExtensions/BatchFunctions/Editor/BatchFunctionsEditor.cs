@@ -291,6 +291,8 @@ namespace VegetationStudioProExtensions
                         EditorUtility.SetDirty(vegetationPackagePro);
                     }
 
+                    vegetationSystemPro.RefreshVegetationSystem();
+
                     VegetationStudioProUtils.SetSceneDirty(vegetationSystemPro);
                 }
 
