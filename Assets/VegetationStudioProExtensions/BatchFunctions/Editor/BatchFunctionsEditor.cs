@@ -85,11 +85,26 @@ namespace VegetationStudioProExtensions
 
                 EditorGUILayout.LabelField("Render Mode", GUIStyles.GroupTitleStyle);
                 {
-                    vegetationRenderMode = (VegetationRenderMode) EditorGUILayout.EnumPopup("Render Mode", vegetationRenderMode);
-                        
+                    vegetationRenderMode = (VegetationRenderMode)EditorGUILayout.EnumPopup("Render Mode", vegetationRenderMode);
+
                     if (GUILayout.Button("Set Render Mode"))
                     {
                         SetRenderMode(vegetationRenderMode, extension.biomeType);
+                    }
+
+                }
+            }
+            GUILayout.EndVertical();
+
+            GUILayout.BeginVertical("box");
+            {
+                EditorGUILayout.Space();
+
+                EditorGUILayout.LabelField("Refresh", GUIStyles.GroupTitleStyle);
+                {
+                    if (GUILayout.Button("Refresh Prefabs"))
+                    {
+                        RefreshPrefabs(extension.biomeType);
                     }
 
                 }
@@ -124,7 +139,7 @@ namespace VegetationStudioProExtensions
         private void GenerateBiomeSplatMaps()
         {
             TerrainSystemPro[] terrainSystemProList = FindObjectsOfType<TerrainSystemPro>();
-            foreach(TerrainSystemPro terrainSystemPro in terrainSystemProList)
+            foreach (TerrainSystemPro terrainSystemPro in terrainSystemProList)
             {
                 terrainSystemPro.GenerateSplatMap(false);
                 terrainSystemPro.ShowTerrainHeatmap(false);
@@ -156,6 +171,22 @@ namespace VegetationStudioProExtensions
 
         }
 
+        private void RefreshPrefabs(BiomeType selectedBiomeType)
+        {
+            // lengthy process, ask first
+            bool isContinue = EditorUtility.DisplayDialog("Refresh Prefabs", "This might take a while depending on the number of vegetation items. Continue?", "Yes", "No");
+
+            if (!isContinue)
+                return;
+
+            // apply action
+            RefreshPrefabsProcessor processor = new RefreshPrefabsProcessor();
+            int itemChangeCount = processor.Process(selectedBiomeType);
+
+            // show confirmation messagebox
+            EditorUtility.DisplayDialog("Refresh Prefabs", "Refresh Prefabs applied to " + itemChangeCount + " items in Biome " + selectedBiomeType, "Ok");
+
+        }
 
         /// <summary>
         /// Set the runtime spawn for all items of a biome.
@@ -169,7 +200,7 @@ namespace VegetationStudioProExtensions
                 this.enabled = enabled;
             }
 
-            public override void OnActionPerformed(VegetationItemInfoPro vegetationItemInfoPro)
+            public override void OnActionPerformed(VegetationPackagePro vegetationPackagePro, VegetationItemInfoPro vegetationItemInfoPro)
             {
                 Debug.Log("Setting Runtime Spawn of " + vegetationItemInfoPro.Name + " from " + vegetationItemInfoPro.EnableRuntimeSpawn + " to " + enabled);
 
@@ -190,12 +221,26 @@ namespace VegetationStudioProExtensions
                 this.vegetationRenderMode = vegetationRenderMode;
             }
 
-            public override void OnActionPerformed(VegetationItemInfoPro vegetationItemInfoPro)
+            public override void OnActionPerformed(VegetationPackagePro vegetationPackagePro, VegetationItemInfoPro vegetationItemInfoPro)
             {
                 Debug.Log("Setting Render Mode of " + vegetationItemInfoPro.Name + " from " + vegetationItemInfoPro.VegetationRenderMode + " to " + vegetationRenderMode);
 
                 // apply settings
                 vegetationItemInfoPro.VegetationRenderMode = vegetationRenderMode;
+            }
+        }
+
+        /// <summary>
+        /// Apply "Refresh Prefab" to all items of a biome.
+        /// </summary>
+        private class RefreshPrefabsProcessor : VegetationItemsProcessor
+        {
+            public override void OnActionPerformed(VegetationPackagePro vegetationPackagePro, VegetationItemInfoPro vegetationItemInfoPro)
+            {
+                Debug.Log("Refreshing Prefab " + vegetationItemInfoPro.Name);
+
+                // apply settings
+                vegetationPackagePro.RefreshVegetationItemPrefab(vegetationItemInfoPro);
             }
         }
 
@@ -208,7 +253,7 @@ namespace VegetationStudioProExtensions
             /// Apply this function to all items of the selected biome
             /// </summary>
             /// <param name="vegetationItemInfoPro"></param>
-            public abstract void OnActionPerformed(VegetationItemInfoPro vegetationItemInfoPro);
+            public abstract void OnActionPerformed(VegetationPackagePro vegetationPackagePro, VegetationItemInfoPro vegetationItemInfoPro);
 
             /// <summary>
             /// Iterate through all items of the selected biome
@@ -234,7 +279,7 @@ namespace VegetationStudioProExtensions
                         foreach (VegetationItemInfoPro vegetationItemInfoPro in vegetationPackagePro.VegetationInfoList)
                         {
                             // perform the actual action
-                            OnActionPerformed(vegetationItemInfoPro);
+                            OnActionPerformed(vegetationPackagePro, vegetationItemInfoPro);
 
                             // clear cache
                             vegetationSystemPro.ClearCache(vegetationItemInfoPro.VegetationItemID);
