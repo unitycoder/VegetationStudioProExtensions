@@ -111,6 +111,23 @@ namespace VegetationStudioProExtensions
             }
             GUILayout.EndVertical();
 
+
+            GUILayout.BeginVertical("box");
+            {
+                EditorGUILayout.Space();
+
+                EditorGUILayout.LabelField("CleanUp", GUIStyles.GroupTitleStyle);
+                {
+                    if (GUILayout.Button("Delete Unused Vegetation Items"))
+                    {
+                        DeleteUnusedVegetationItems(extension.biomeType);
+                    }
+
+                }
+            }
+            GUILayout.EndVertical();
+
+
             GUILayout.BeginVertical("box");
             {
                 EditorGUILayout.Space();
@@ -188,6 +205,20 @@ namespace VegetationStudioProExtensions
 
         }
 
+        private void DeleteUnusedVegetationItems(BiomeType selectedBiomeType)
+        {
+
+            bool isContinue = EditorUtility.DisplayDialog("Delete Unused Vegetation Items", "Delete all Vegetation Items which have runtime-spawn unselected. Continue?", "Yes", "No");
+
+            if (!isContinue)
+                return;
+
+            DeleteUnusedVegetationItemsProcessor processor = new DeleteUnusedVegetationItemsProcessor();
+            int itemChangeCount = processor.Process(selectedBiomeType);
+
+            EditorUtility.DisplayDialog("Delete Unused Vegetation Items", "Delete Unused Vegetation Items examined and processed " + itemChangeCount + " items in Biome " + selectedBiomeType, "Ok");
+        }
+
         /// <summary>
         /// Set the runtime spawn for all items of a biome.
         /// </summary>
@@ -245,6 +276,25 @@ namespace VegetationStudioProExtensions
         }
 
         /// <summary>
+        /// Apply "Delete Unused Vegetation Items" to all items of a biome.
+        /// </summary>
+        private class DeleteUnusedVegetationItemsProcessor : VegetationItemsProcessor
+        {
+            public override void OnActionPerformed(VegetationPackagePro vegetationPackagePro, VegetationItemInfoPro vegetationItemInfoPro)
+            {
+                // skip all which have runtime spawn enabled
+                if (vegetationItemInfoPro.EnableRuntimeSpawn)
+                    return;
+
+                Debug.Log("Deleting Vegetation Item " + vegetationItemInfoPro.Name);
+
+                // apply settings
+                vegetationPackagePro.VegetationInfoList.Remove(vegetationItemInfoPro);
+
+            }
+        }
+
+        /// <summary>
         /// Process all vegetation items of the vegetation system for the selected biome and apply an action.
         /// </summary>
         private abstract class VegetationItemsProcessor
@@ -276,7 +326,8 @@ namespace VegetationStudioProExtensions
                         if (vegetationPackagePro.BiomeType != selectedBiomeType)
                             continue;
 
-                        foreach (VegetationItemInfoPro vegetationItemInfoPro in vegetationPackagePro.VegetationInfoList)
+                        // note: the delete mechanism operates on the list itself => we have to use a clone => using ToArray() on the list
+                        foreach (VegetationItemInfoPro vegetationItemInfoPro in vegetationPackagePro.VegetationInfoList.ToArray())
                         {
                             // perform the actual action
                             OnActionPerformed(vegetationPackagePro, vegetationItemInfoPro);
