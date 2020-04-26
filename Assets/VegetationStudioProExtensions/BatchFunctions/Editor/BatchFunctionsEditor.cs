@@ -147,6 +147,31 @@ namespace VegetationStudioProExtensions
             }
             GUILayout.EndVertical();
 
+
+            GUILayout.BeginVertical("box");
+            {
+                EditorGUILayout.Space();
+
+                EditorGUILayout.LabelField("Touch React Active (NatureManufacture Materials)", GUIStyles.GroupTitleStyle);
+                {
+                    GUILayout.BeginHorizontal();
+                    {
+                        if (GUILayout.Button("Enable ALL in Filter"))
+                        {
+                            SetTouchReactActive(true, extension.biomeType);
+                        }
+
+                        if (GUILayout.Button("Disable ALL in Filter"))
+                        {
+                            SetTouchReactActive(false, extension.biomeType);
+                        }
+
+                    }
+                    GUILayout.EndHorizontal();
+                }
+            }
+            GUILayout.EndVertical();
+
             serializedObject.ApplyModifiedProperties();
         }
 
@@ -220,6 +245,21 @@ namespace VegetationStudioProExtensions
         }
 
         /// <summary>
+        /// Set the TouchReactActive material value for all vegetation items of the selected biome type
+        /// </summary>
+        /// <param name="enabled"></param>
+        /// <param name="selectedBiomeType"></param>
+        private void SetTouchReactActive(bool active, BiomeType selectedBiomeType)
+        {
+            TouchReactActiveProcessor processor = new TouchReactActiveProcessor(active);
+            int itemChangeCount = processor.Process(selectedBiomeType);
+
+            // show confirmation messagebox
+            EditorUtility.DisplayDialog("Set Touch React Active", "TouchReactActive changed to " + active + " in Biome " + selectedBiomeType, "Ok");
+
+        }
+
+        /// <summary>
         /// Set the runtime spawn for all items of a biome.
         /// </summary>
         private class RuntimeSpawnProcessor : VegetationItemsProcessor
@@ -287,10 +327,45 @@ namespace VegetationStudioProExtensions
                     return;
 
                 Debug.Log("Deleting Vegetation Item " + vegetationItemInfoPro.Name);
-
+                
                 // apply settings
                 vegetationPackagePro.VegetationInfoList.Remove(vegetationItemInfoPro);
 
+            }
+        }
+
+        /// <summary>
+        /// Set the TouchReactActive material value for all items of a biome which support that.
+        /// </summary>
+        private class TouchReactActiveProcessor : VegetationItemsProcessor
+        {
+            private string propertyId = "_TouchReactActive";
+            private float propertyValue;
+
+            public TouchReactActiveProcessor(bool active)
+            {
+                this.propertyValue = active ? 1 : 0;
+            }
+
+            public override void OnActionPerformed(VegetationPackagePro vegetationPackagePro, VegetationItemInfoPro vegetationItemInfoPro)
+            {
+
+                // apply settings
+                GameObject vegetationPrefab = vegetationItemInfoPro.VegetationPrefab;
+
+                // get materials
+                Material[] vegetationItemMaterials = AwesomeTechnologies.Shaders.ShaderSelector.GetVegetationItemMaterials(vegetationPrefab);
+
+                // process items
+                foreach (Material material in vegetationItemMaterials)
+                {
+                    if (material.HasProperty(propertyId))
+                    {
+                        Debug.Log("Setting _TouchReactActive of " + vegetationItemInfoPro.Name + ", material: " + material.name + " from " + material.GetFloat(propertyId) + " to " + propertyValue);
+
+                        material.SetFloat(propertyId, propertyValue);
+                    }
+                }
             }
         }
 
