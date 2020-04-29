@@ -255,7 +255,7 @@ namespace VegetationStudioProExtensions
             int itemChangeCount = processor.Process(selectedBiomeType);
 
             // show confirmation messagebox
-            EditorUtility.DisplayDialog("Set Touch React Active", "TouchReactActive changed to " + active + " in Biome " + selectedBiomeType, "Ok");
+            EditorUtility.DisplayDialog("Set Touch React Active", "TouchReactActive changed to " + active + " in Biome " + selectedBiomeType + " for Grass and Plants", "Ok");
 
         }
 
@@ -352,6 +352,15 @@ namespace VegetationStudioProExtensions
 
                 // apply settings
                 GameObject vegetationPrefab = vegetationItemInfoPro.VegetationPrefab;
+
+                VegetationType vegetationType = vegetationItemInfoPro.VegetationType;
+
+                // support only grass & plants. doesn't make much sense to have trees and objects use touch react
+                if(vegetationType != VegetationType.Grass && vegetationType != VegetationType.Plant)
+                {
+                    Debug.Log("Only Grass & Plant supported. Skipping " + vegetationPrefab.name);
+                    return;
+                }
 
                 // get materials
                 Material[] vegetationItemMaterials = AwesomeTechnologies.Shaders.ShaderSelector.GetVegetationItemMaterials(vegetationPrefab);
