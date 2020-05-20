@@ -6,36 +6,39 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
-public class VegetationStudioProUtils 
+namespace VegetationStudioProExtensions
 {
-    public static void RefreshVegetation()
+    public class VegetationStudioProUtils
     {
-        VegetationStudioManager VegetationStudioInstance = FindVegetationStudioInstance();
-
-        List<VegetationSystemPro> VegetationSystemList = VegetationStudioInstance.VegetationSystemList;
-        for (int i = 0; i <= VegetationSystemList.Count - 1; i++)
+        public static void RefreshVegetation()
         {
-            VegetationSystemPro vegetationSystemPro = VegetationSystemList[i];
+            VegetationStudioManager VegetationStudioInstance = FindVegetationStudioInstance();
 
-            vegetationSystemPro.ClearCache();
-            vegetationSystemPro.RefreshTerrainHeightmap();
-            SceneView.RepaintAll();
+            List<VegetationSystemPro> VegetationSystemList = VegetationStudioInstance.VegetationSystemList;
+            for (int i = 0; i <= VegetationSystemList.Count - 1; i++)
+            {
+                VegetationSystemPro vegetationSystemPro = VegetationSystemList[i];
 
-            SetSceneDirty(vegetationSystemPro);
+                vegetationSystemPro.ClearCache();
+                vegetationSystemPro.RefreshTerrainHeightmap();
+                SceneView.RepaintAll();
+
+                SetSceneDirty(vegetationSystemPro);
+            }
         }
-    }
 
-    public static void SetSceneDirty(VegetationSystemPro vegetationSystemPro)
-    {
-        if (!Application.isPlaying)
+        public static void SetSceneDirty(VegetationSystemPro vegetationSystemPro)
         {
-            EditorSceneManager.MarkSceneDirty(vegetationSystemPro.gameObject.scene);
-            EditorUtility.SetDirty(vegetationSystemPro);
+            if (!Application.isPlaying)
+            {
+                EditorSceneManager.MarkSceneDirty(vegetationSystemPro.gameObject.scene);
+                EditorUtility.SetDirty(vegetationSystemPro);
+            }
         }
-    }
 
-    public static VegetationStudioManager FindVegetationStudioInstance()
-    {
-        return (VegetationStudioManager) Object.FindObjectOfType(typeof(VegetationStudioManager));
+        public static VegetationStudioManager FindVegetationStudioInstance()
+        {
+            return (VegetationStudioManager)Object.FindObjectOfType(typeof(VegetationStudioManager));
+        }
     }
 }

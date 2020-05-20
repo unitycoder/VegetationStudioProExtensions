@@ -2,69 +2,72 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Utils 
+namespace VegetationStudioProExtensions
 {
-    /// <summary>
-    /// Value can't be lower than minValue
-    /// </summary>
-    /// <param name="value"></param>
-    /// <param name="minValue"></param>
-    /// <returns></returns>
-    public static float ClipMin( float value, float minValue)
+    public class Utils
     {
-        if( value < minValue)
+        /// <summary>
+        /// Value can't be lower than minValue
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="minValue"></param>
+        /// <returns></returns>
+        public static float ClipMin(float value, float minValue)
         {
-            value = minValue;
+            if (value < minValue)
+            {
+                value = minValue;
+            }
+
+            return value;
         }
 
-        return value;
-    }
-
-    /// <summary>
-    /// Value can't be lower than minValue
-    /// </summary>
-    /// <param name="value"></param>
-    /// <param name="minValue"></param>
-    /// <returns></returns>
-    public static int ClipMin(int value, int minValue)
-    {
-        if (value < minValue)
+        /// <summary>
+        /// Value can't be lower than minValue
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="minValue"></param>
+        /// <returns></returns>
+        public static int ClipMin(int value, int minValue)
         {
-            value = minValue;
+            if (value < minValue)
+            {
+                value = minValue;
+            }
+
+            return value;
         }
 
-        return value;
-    }
-
-    /// <summary>
-    /// Value can't be higher than maxValue
-    /// </summary>
-    /// <param name="value"></param>
-    /// <param name="maxValue"></param>
-    /// <returns></returns>
-    public static float ClipMax(float value, float maxValue)
-    {
-        if (value > maxValue)
+        /// <summary>
+        /// Value can't be higher than maxValue
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="maxValue"></param>
+        /// <returns></returns>
+        public static float ClipMax(float value, float maxValue)
         {
-            value = maxValue;
+            if (value > maxValue)
+            {
+                value = maxValue;
+            }
+
+            return value;
         }
 
-        return value;
-    }
-
-    /// <summary>
-    /// Value can't be higher than maxValue
-    /// </summary>
-    /// <param name="value"></param>
-    /// <param name="maxValue"></param>
-    /// <returns></returns>
-    public static int ClipMax(int value, int maxValue)
-    {
-        if (value > maxValue)
+        /// <summary>
+        /// Value can't be higher than maxValue
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="maxValue"></param>
+        /// <returns></returns>
+        public static int ClipMax(int value, int maxValue)
         {
-            value = maxValue;
-        }
+            if (value > maxValue)
+            {
+                value = maxValue;
+            }
 
-        return value;
+            return value;
+        }
     }
 }
