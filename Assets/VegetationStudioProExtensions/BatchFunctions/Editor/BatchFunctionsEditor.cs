@@ -18,6 +18,7 @@ namespace VegetationStudioProExtensions
 
         private static VegetationStudioManager VegetationStudioInstance;
 
+        private SerializedProperty modifyAll;
         private SerializedProperty biomeType;
 
         // local attributes which aren't persisted
@@ -40,6 +41,7 @@ namespace VegetationStudioProExtensions
             extension = (BatchFunctions)target;
 
             // biomes
+            modifyAll = FindProperty(x => x.modifyAll);
             biomeType = FindProperty(x => x.biomeType);
 
             // get only the added biome types, we don't want all of the enum in the popup
@@ -56,7 +58,12 @@ namespace VegetationStudioProExtensions
 
                 EditorGUILayout.LabelField("Batch Filter", GUIStyles.GroupTitleStyle);
                 {
-                    biomeType.intValue = EditorGUILayout.Popup("Biome Type", biomeType.intValue, addedBiomes.GetStrings());
+                    EditorGUILayout.PropertyField(modifyAll, new GUIContent("Modify All", "Whether a filter should be used or the changes should be applied to all biomes"));
+
+                    if (!modifyAll.boolValue)
+                    {
+                        biomeType.intValue = EditorGUILayout.Popup("Biome Type Filter", biomeType.intValue, addedBiomes.GetStrings());
+                    }
                 }
 
             }
@@ -72,12 +79,12 @@ namespace VegetationStudioProExtensions
                     {
                         if (GUILayout.Button("Enable ALL in Filter"))
                         {
-                            SetRuntimeSpawn(true, extension.biomeType);
+                            SetRuntimeSpawn(true, GetFilteredBiomeTypes());
                         }
 
                         if (GUILayout.Button("Disable ALL in Filter"))
                         {
-                            SetRuntimeSpawn(false, extension.biomeType);
+                            SetRuntimeSpawn(false, GetFilteredBiomeTypes());
                         }
 
                     }
@@ -96,7 +103,7 @@ namespace VegetationStudioProExtensions
 
                     if (GUILayout.Button("Set Render Mode"))
                     {
-                        SetRenderMode(vegetationRenderMode, extension.biomeType);
+                        SetRenderMode(vegetationRenderMode, GetFilteredBiomeTypes());
                     }
 
                 }
@@ -111,7 +118,7 @@ namespace VegetationStudioProExtensions
                 {
                     if (GUILayout.Button("Refresh Prefabs"))
                     {
-                        RefreshPrefabs(extension.biomeType);
+                        RefreshPrefabs(GetFilteredBiomeTypes());
                     }
 
                 }
@@ -127,7 +134,7 @@ namespace VegetationStudioProExtensions
                 {
                     if (GUILayout.Button("Delete Unused Vegetation Items"))
                     {
-                        DeleteUnusedVegetationItems(extension.biomeType);
+                        DeleteUnusedVegetationItems(GetFilteredBiomeTypes());
                     }
 
                 }
@@ -165,12 +172,12 @@ namespace VegetationStudioProExtensions
                     {
                         if (GUILayout.Button("Enable ALL in Filter"))
                         {
-                            SetTouchReactActive(true, extension.biomeType);
+                            SetTouchReactActive(true, GetFilteredBiomeTypes());
                         }
 
                         if (GUILayout.Button("Disable ALL in Filter"))
                         {
-                            SetTouchReactActive(false, extension.biomeType);
+                            SetTouchReactActive(false, GetFilteredBiomeTypes());
                         }
 
                     }
@@ -180,6 +187,23 @@ namespace VegetationStudioProExtensions
             GUILayout.EndVertical();
 
             serializedObject.ApplyModifiedProperties();
+        }
+
+        /// <summary>
+        /// Get the selected biome type filter. Either all in an array or just a single element array.
+        /// </summary>
+        /// <returns></returns>
+        private BiomeType[] GetFilteredBiomeTypes()
+        {
+            if( extension.modifyAll)
+            {
+                return addedBiomes.GetObjects();
+            }
+            else
+            {
+                return new BiomeType[] { extension.biomeType };
+            }
+            
         }
 
         /// <summary>
@@ -199,28 +223,28 @@ namespace VegetationStudioProExtensions
         /// Set the runtime spawn flag on the selected biome type
         /// </summary>
         /// <param name="enabled"></param>
-        /// <param name="selectedBiomeType"></param>
-        private void SetRuntimeSpawn(bool enabled, BiomeType selectedBiomeType)
+        /// <param name="selectedBiomeTypes"></param>
+        private void SetRuntimeSpawn(bool enabled, BiomeType[] selectedBiomeTypes)
         {
             RuntimeSpawnProcessor processor = new RuntimeSpawnProcessor(enabled);
-            int itemChangeCount = processor.Process(selectedBiomeType);
+            int itemChangeCount = processor.Process(selectedBiomeTypes);
 
             // show confirmation messagebox
-            EditorUtility.DisplayDialog("Set Runtime Spawn", "Runtime Spawn changed to " + enabled + " for " + itemChangeCount + " items in Biome " + selectedBiomeType, "Ok");
+            EditorUtility.DisplayDialog("Set Runtime Spawn", "Runtime Spawn changed to " + enabled + " for " + itemChangeCount + " items", "Ok");
 
         }
 
-        private void SetRenderMode(VegetationRenderMode vegetationRenderMode, BiomeType selectedBiomeType)
+        private void SetRenderMode(VegetationRenderMode vegetationRenderMode, BiomeType[] selectedBiomeTypes)
         {
             RenderModeProcessor processor = new RenderModeProcessor(vegetationRenderMode);
-            int itemChangeCount = processor.Process(selectedBiomeType);
+            int itemChangeCount = processor.Process(selectedBiomeTypes);
 
             // show confirmation messagebox
-            EditorUtility.DisplayDialog("Set Render Mode", "Render mode changed to " + vegetationRenderMode + " for " + itemChangeCount + " items in Biome " + selectedBiomeType, "Ok");
+            EditorUtility.DisplayDialog("Set Render Mode", "Render mode changed to " + vegetationRenderMode + " for " + itemChangeCount + " items", "Ok");
 
         }
 
-        private void RefreshPrefabs(BiomeType selectedBiomeType)
+        private void RefreshPrefabs(BiomeType[] selectedBiomeTypes)
         {
             // lengthy process, ask first
             bool isContinue = EditorUtility.DisplayDialog("Refresh Prefabs", "This might take a while depending on the number of vegetation items. Continue?", "Yes", "No");
@@ -230,14 +254,14 @@ namespace VegetationStudioProExtensions
 
             // apply action
             RefreshPrefabsProcessor processor = new RefreshPrefabsProcessor();
-            int itemChangeCount = processor.Process(selectedBiomeType);
+            int itemChangeCount = processor.Process(selectedBiomeTypes);
 
             // show confirmation messagebox
-            EditorUtility.DisplayDialog("Refresh Prefabs", "Refresh Prefabs applied to " + itemChangeCount + " items in Biome " + selectedBiomeType, "Ok");
+            EditorUtility.DisplayDialog("Refresh Prefabs", "Refresh Prefabs applied to " + itemChangeCount + " items", "Ok");
 
         }
 
-        private void DeleteUnusedVegetationItems(BiomeType selectedBiomeType)
+        private void DeleteUnusedVegetationItems(BiomeType[] selectedBiomeTypes)
         {
 
             bool isContinue = EditorUtility.DisplayDialog("Delete Unused Vegetation Items", "Delete all Vegetation Items which have runtime-spawn unselected. Continue?", "Yes", "No");
@@ -246,23 +270,23 @@ namespace VegetationStudioProExtensions
                 return;
 
             DeleteUnusedVegetationItemsProcessor processor = new DeleteUnusedVegetationItemsProcessor();
-            int itemChangeCount = processor.Process(selectedBiomeType);
+            int itemChangeCount = processor.Process(selectedBiomeTypes);
 
-            EditorUtility.DisplayDialog("Delete Unused Vegetation Items", "Delete Unused Vegetation Items examined and processed " + itemChangeCount + " items in Biome " + selectedBiomeType, "Ok");
+            EditorUtility.DisplayDialog("Delete Unused Vegetation Items", "Delete Unused Vegetation Items examined and processed " + itemChangeCount + " items", "Ok");
         }
 
         /// <summary>
         /// Set the TouchReactActive material value for all vegetation items of the selected biome type
         /// </summary>
         /// <param name="enabled"></param>
-        /// <param name="selectedBiomeType"></param>
-        private void SetTouchReactActive(bool active, BiomeType selectedBiomeType)
+        /// <param name="selectedBiomeTypes"></param>
+        private void SetTouchReactActive(bool active, BiomeType[] selectedBiomeTypes)
         {
             TouchReactActiveProcessor processor = new TouchReactActiveProcessor(active);
-            int itemChangeCount = processor.Process(selectedBiomeType);
+            int itemChangeCount = processor.Process(selectedBiomeTypes);
 
             // show confirmation messagebox
-            EditorUtility.DisplayDialog("Set Touch React Active", "TouchReactActive changed to " + active + " in Biome " + selectedBiomeType + " for Grass and Plants", "Ok");
+            EditorUtility.DisplayDialog("Set Touch React Active", "TouchReactActive changed to " + active + " for Grass and Plants", "Ok");
 
         }
 
@@ -399,9 +423,9 @@ namespace VegetationStudioProExtensions
             /// <summary>
             /// Iterate through all items of the selected biome
             /// </summary>
-            /// <param name="selectedBiomeType"></param>
+            /// <param name="selectedBiomeTypes"></param>
             /// <returns></returns>
-            public int Process(BiomeType selectedBiomeType)
+            public int Process(BiomeType[] selectedBiomeTypes)
             {
                 int itemChangeCount = 0;
 
@@ -412,9 +436,9 @@ namespace VegetationStudioProExtensions
 
                     foreach (VegetationPackagePro vegetationPackagePro in vegetationSystemPro.VegetationPackageProList)
                     {
-
+                        
                         // filter biome type
-                        if (vegetationPackagePro.BiomeType != selectedBiomeType)
+                        if (!ArrayUtility.Contains(selectedBiomeTypes, vegetationPackagePro.BiomeType))
                             continue;
 
                         // note: the delete mechanism operates on the list itself => we have to use a clone => using ToArray() on the list
