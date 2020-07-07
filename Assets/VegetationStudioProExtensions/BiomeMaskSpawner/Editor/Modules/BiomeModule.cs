@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using AwesomeTechnologies.VegetationSystem;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -14,6 +15,11 @@ namespace VegetationStudioProExtensions
 
         private BiomeMaskSpawnerExtensionEditor editor;
 
+        /// <summary>
+        /// The biome types as objects and strings. Used in the popup component.
+        /// </summary>
+        private PopupData<BiomeType> addedBiomes;
+
         public BiomeModule(BiomeMaskSpawnerExtensionEditor editor)
         {
             this.editor = editor;
@@ -25,13 +31,17 @@ namespace VegetationStudioProExtensions
             biomeBlendDistanceMin = editor.FindProperty(x => x.biomeSettings.biomeBlendDistanceMin);
             biomeBlendDistanceMax = editor.FindProperty(x => x.biomeSettings.biomeBlendDistanceMax);
             biomeDensity = editor.FindProperty(x => x.biomeSettings.density);
+
+            // get only the added biome types, we don't want all of the enum in the popup
+            addedBiomes = new PopupData<BiomeType>(VegetationStudioProUtils.GetAddedBiomeTypes().ToArray());
+
         }
 
         public void OnInspectorGUI()
         {
             EditorGUILayout.LabelField("Biome Settings", GUIStyles.GroupTitleStyle);
             {
-                EditorGUILayout.PropertyField(biomeType, new GUIContent("Biome Type", "The Biome type to be used."));
+                biomeType.intValue = EditorGUILayout.Popup("Biome Type", biomeType.intValue, addedBiomes.GetStrings());
 
                 EditorGUILayout.LabelField(new GUIContent("Biome Blend Distance", "The relative Biome blend distance. 0 = no blending, 1 = full blending."));
                 EditorGuiUtilities.MinMaxEditor("Min", ref biomeBlendDistanceMin, "Max", ref biomeBlendDistanceMax, 0f, 1f, true);

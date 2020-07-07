@@ -40,5 +40,31 @@ namespace VegetationStudioProExtensions
         {
             return (VegetationStudioManager)Object.FindObjectOfType(typeof(VegetationStudioManager));
         }
+
+        /// <summary>
+        /// Get the added biome types, i. e. only those which have an added vegetation package
+        /// </summary>
+        /// <param name="vegetationSystemPro"></param>
+        /// <returns></returns>
+        public static List<BiomeType> GetAddedBiomeTypes()
+        {
+            List<BiomeType> biomeTypes = new List<BiomeType>();
+
+            VegetationStudioManager VegetationStudioInstance = FindVegetationStudioInstance();
+
+            List<VegetationSystemPro> VegetationSystemList = VegetationStudioInstance.VegetationSystemList;
+
+            for (int i = 0; i <= VegetationSystemList.Count - 1; i++)
+            {
+                VegetationSystemPro vegetationSystemPro = VegetationSystemList[i];
+
+                foreach (VegetationPackagePro vegetationPackagePro in vegetationSystemPro.VegetationPackageProList)
+                {
+                    biomeTypes.Add(vegetationPackagePro.BiomeType);
+                }
+            }
+
+            return biomeTypes;
+        }
     }
 }

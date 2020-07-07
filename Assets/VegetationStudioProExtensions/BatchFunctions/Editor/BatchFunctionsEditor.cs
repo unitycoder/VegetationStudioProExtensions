@@ -1,9 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using AwesomeTechnologies.VegetationSystem;
-using UnityEditor.SceneManagement;
 using AwesomeTechnologies.VegetationStudio;
 using AwesomeTechnologies.TerrainSystem;
 
@@ -27,7 +25,13 @@ namespace VegetationStudioProExtensions
 
         private VegetationRenderMode vegetationRenderMode = VegetationRenderMode.InstancedIndirect;
 
+        /// <summary>
+        /// The biome types as objects and strings. Used in the popup component.
+        /// </summary>
+        private PopupData<BiomeType> addedBiomes;
+
         #endregion local attributes
+
 
         public void OnEnable()
         {
@@ -37,6 +41,9 @@ namespace VegetationStudioProExtensions
 
             // biomes
             biomeType = FindProperty(x => x.biomeType);
+
+            // get only the added biome types, we don't want all of the enum in the popup
+            addedBiomes = new PopupData<BiomeType>(VegetationStudioProUtils.GetAddedBiomeTypes().ToArray());
         }
 
         public override void OnInspectorGUI()
@@ -49,7 +56,7 @@ namespace VegetationStudioProExtensions
 
                 EditorGUILayout.LabelField("Batch Filter", GUIStyles.GroupTitleStyle);
                 {
-                    EditorGUILayout.PropertyField(biomeType, new GUIContent("Biome Type", "The Biome type to be used."));
+                    biomeType.intValue = EditorGUILayout.Popup("Biome Type", biomeType.intValue, addedBiomes.GetStrings());
                 }
 
             }
