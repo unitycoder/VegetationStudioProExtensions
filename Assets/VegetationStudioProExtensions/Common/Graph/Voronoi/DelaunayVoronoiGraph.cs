@@ -1,13 +1,16 @@
-﻿using Delaunay.VectorUtils;
-using InteractiveDelaunayVoronoi;
-using SutherlandHodgmanAlgorithm;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using UnityEngine;
 
 namespace DelaunayVoronoi
 {
+    // Some names like "Cell" are too common. So in case someone creates a Cell class in global namespace we might run into conflicts.
+    // Putting the internal classes inside the namespace makes the compiler search for the internal ones before the global ones.
+    using Delaunay.VectorUtils;
+    using InteractiveDelaunayVoronoi;
+    using SutherlandHodgmanAlgorithm;
+
     /// <summary>
     /// DelaunayVoronoi wrapper class to keep the code independent from the original DelaunayVoronoi implementation
     /// </summary>

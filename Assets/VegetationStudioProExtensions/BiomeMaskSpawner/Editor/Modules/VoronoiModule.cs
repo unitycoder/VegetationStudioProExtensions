@@ -1,13 +1,15 @@
-﻿using DelaunayVoronoi;
-using InteractiveDelaunayVoronoi;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using UnityEditor;
 
 namespace VegetationStudioProExtensions
 {
+    // Some names like "Cell" are too common. So in case someone creates a Cell class in global namespace we might run into conflicts.
+    // Putting the internal classes inside the namespace makes the compiler search for the internal ones before the global ones.
+    using DelaunayVoronoi;
+    using InteractiveDelaunayVoronoi;
+
     public class VoronoiModule : ISettingsModule
     {
         private SerializedProperty voronoiPointCount;
