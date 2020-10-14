@@ -1,6 +1,7 @@
 ﻿using AwesomeTechnologies.VegetationSystem;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -37,11 +38,43 @@ namespace VegetationStudioProExtensions
 
         }
 
+        /// <summary>
+        /// Find the popup index, i. e. the filtered index; it isn't necessarily the one of the enum id
+        /// </summary>
+        /// <returns></returns>
+        private int GetCurrentBiomePopupIndex()
+        {
+            // select first biome type as default
+            BiomeType selectedBiomeType = addedBiomes.GetObjects()[0];
+
+            // find the popup index, i. e. the filtered index; it isn't necessarily the one of the enum
+            int currentPopupIndex = (int)selectedBiomeType;
+            for (int i = 0; i < addedBiomes.GetObjects().Length; i++)
+            {
+                BiomeType currentBiomeType = addedBiomes.GetObjects()[i];
+
+                if ((int)currentBiomeType == biomeType.intValue)
+                {
+                    currentPopupIndex = i;
+                    break;
+                }
+            }
+
+            return currentPopupIndex;
+        }
+
         public void OnInspectorGUI()
         {
             EditorGUILayout.LabelField("Biome Settings", GUIStyles.GroupTitleStyle);
             {
-                biomeType.intValue = EditorGUILayout.Popup("Biome Type", biomeType.intValue, addedBiomes.GetStrings());
+                // find the popup index, i. e. the filtered index; it isn't necessarily the one of the enum
+                int currentPopupIndex = GetCurrentBiomePopupIndex();
+
+                int newIndex = EditorGUILayout.Popup("Biome Type", currentPopupIndex, addedBiomes.GetStrings());
+
+                // map popup index to biome index
+                BiomeType newSelectedBiomeType = addedBiomes.GetObjects()[newIndex];
+                biomeType.intValue = (int) newSelectedBiomeType;
 
                 EditorGUILayout.LabelField(new GUIContent("Biome Blend Distance", "The relative Biome blend distance. 0 = no blending, 1 = full blending."));
                 EditorGuiUtilities.MinMaxEditor("Min", ref biomeBlendDistanceMin, "Max", ref biomeBlendDistanceMax, 0f, 1f, true);
