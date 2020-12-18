@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEditor;
 using System.Linq;
 using System;
+using System.Collections.Generic;
 
 namespace VegetationStudioProExtensions
 {
@@ -10,20 +11,28 @@ namespace VegetationStudioProExtensions
     [CanEditMultipleObjects]
     public class VegetationMaskLineExtensionEditor : BaseEditor<VegetationMaskLineExtension>
     {
-        private VegetationMaskLineExtension extension;
+        private VegetationMaskLineExtension editorTarget;
         private VegetationMaskLine mask;
 
-        private SerializedProperty container;
+        private SerializedProperty dataSourceType;
+        private SerializedProperty dataSource;
         private SerializedProperty closedPath;
+        private SerializedProperty douglasPeuckerReductionTolerance;
+
+        TrainController trainControllerIntegration;
 
         public void OnEnable()
         {
-            extension = (VegetationMaskLineExtension)target;
+            editorTarget = (VegetationMaskLineExtension)target;
 
-            mask = extension.GetComponent<VegetationMaskLine>();
+            mask = editorTarget.GetComponent<VegetationMaskLine>();
 
-            container = FindProperty(x => x.container);
+            dataSourceType = FindProperty(x => x.dataSourceType);
+            dataSource = FindProperty(x => x.dataSource);
             closedPath = FindProperty(x => x.closedPath);
+            douglasPeuckerReductionTolerance = FindProperty(x => x.douglasPeuckerReductionTolerance);
+
+            trainControllerIntegration = new TrainController(editorTarget);
         }
 
         public override void OnInspectorGUI()
@@ -35,21 +44,23 @@ namespace VegetationStudioProExtensions
 
             GUILayout.BeginVertical("box");
             {
-                EditorGUILayout.HelpBox("Create a line mask using all of the children of the specified container", MessageType.Info);
+                EditorGUILayout.HelpBox("Create a line mask using various kinds of input", MessageType.Info);
 
                 //
                 // properties
                 //
 
+                EditorGUILayout.PropertyField(dataSourceType, new GUIContent("Data Source", "The data source for the line points"));
+
                 GUILayout.BeginHorizontal();
                 {
                     // show error color in case there's no container
-                    if (extension.container == null)
+                    if (editorTarget.dataSource == null)
                     {
                         SetErrorBackgroundColor();
                     }
 
-                    EditorGUILayout.PropertyField(container, new GUIContent("Container", "The transforms of the children of this container (parent) object will be used to create the line mask"));
+                    EditorGUILayout.PropertyField(dataSource, new GUIContent("Container", "The transforms of the children of this container (parent) object will be used to create the line mask"));
 
                     // default color in case error color was set
                     SetDefaultBackgroundColor();
@@ -59,6 +70,8 @@ namespace VegetationStudioProExtensions
                 EditorGUILayout.LabelField("Children", GetChildCount().ToString());
 
                 EditorGUILayout.PropertyField(closedPath, new GUIContent("Closed Path", "If Closed Path is selected, then the last point will be connected to the first point"));
+
+                EditorGUILayout.PropertyField(douglasPeuckerReductionTolerance, new GUIContent("Node Reduction Tolerance", "Douglas Peucker node reduction tolerance. 0 = disabled."));
 
                 EditorGUILayout.Space();
 
@@ -95,41 +108,78 @@ namespace VegetationStudioProExtensions
 
         private int GetChildCount()
         {
-            if (extension.container == null)
+            if (editorTarget.dataSource == null)
                 return 0;
 
-            return extension.container.GetComponentInChildren<Transform>().childCount;
+            return editorTarget.dataSource.GetComponentInChildren<Transform>().childCount;
         }
 
         private void ClearLineMask()
         {
             mask.ClearNodes();
+
+            VegetationStudioProUtils.RefreshVegetation();
         }
 
         private void CreateLineMask()
         {
-            if (extension.container == null)
+            if (editorTarget.dataSource == null)
             {
                 Debug.LogError("Container isn't set. Please specify a GameObject which contains transforms as children.");
                 return;
             }
 
-            Vector3[] positions = extension.container.GetComponentsInChildren<Transform>().Select(x => x.position).ToArray();
+            List<Vector3> positions = GetPositions();
 
             // closed path: connect last with first position
-            if( closedPath.boolValue && positions.Length > 1)
+            if( closedPath.boolValue && positions.Count > 1)
             {
-                // resize array by 1
-                Array.Resize(ref positions, positions.Length + 1);
-
                 // add first position as last position
-                positions[positions.Length - 1] = positions[0];
+                positions.Add( positions[0]);
             }
 
             mask.ClearNodes();
-            mask.AddNodesToEnd(positions);
+            mask.AddNodesToEnd(positions.ToArray());
+
+            VegetationStudioProUtils.RefreshVegetation();
 
         }
 
+        /// <summary>
+        /// Get the positions depending on the data source
+        /// </summary>
+        /// <returns></returns>        
+        private List<Vector3> GetPositions()
+        {
+            List<Vector3> positions;
+
+            switch ( editorTarget.dataSourceType)
+            {
+                case VegetationMaskLineExtension.DataSourceType.Container:
+                    positions = GetContainerChildrenPositions();
+                    break;
+                case VegetationMaskLineExtension.DataSourceType.TrainController:
+                    positions = trainControllerIntegration.GetTrainControllerPositions();
+                    break;
+                default:
+                    throw new Exception("Invalid data source: " + editorTarget.dataSourceType);
+
+            }
+
+            positions = VegetationMaskUtils.ApplyDoublesPeucker(positions, editorTarget.douglasPeuckerReductionTolerance);
+
+            return positions;
+        }
+
+        /// <summary>
+        /// Positions are determined by the transforms of gameobjects.
+        /// </summary>
+        /// <returns></returns>
+        private List<Vector3> GetContainerChildrenPositions()
+        {
+            List<Vector3> positions = editorTarget.dataSource.GetComponentsInChildren<Transform>().Select(x => x.position).ToList();
+
+            return positions;
+        }
     }
 }

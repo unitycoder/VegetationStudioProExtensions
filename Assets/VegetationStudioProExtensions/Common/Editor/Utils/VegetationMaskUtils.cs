@@ -234,5 +234,30 @@ namespace VegetationStudioProExtensions
         {
             return mask.Nodes.ConvertAll<Vector3>(item => new Vector3(item.Position.x, item.Position.y, item.Position.z));
         }
+
+        /// <summary>
+        /// Apply the Douglas Peucker reduction algorithm
+        /// </summary>
+        /// <param name="positions"></param>
+        /// <returns></returns>
+        public static List<Vector3> ApplyDoublesPeucker(List<Vector3> positions, float douglasPeuckerReductionTolerance)
+        {
+            if (douglasPeuckerReductionTolerance == 0)
+                return positions;
+
+            // convert to vector2
+            List<Vector2> vector2List = positions.ConvertAll<Vector2>(item => new Vector2(item.x, item.z));
+
+            // use vspro's DouglasPeuckerReduction algorithm
+            vector2List = PolygonUtility.DouglasPeuckerReduction(vector2List, douglasPeuckerReductionTolerance);
+
+            // convert back to vector3
+            if (vector2List.Count >= 3)
+            {
+                positions = vector2List.ConvertAll<Vector3>(item => new Vector3(item.x, 0, item.y));
+            }
+
+            return positions;
+        }
     }
 }
