@@ -30,16 +30,7 @@ public class TrainController
 
             for (int i = 0; i <= steps; i++)
             {
-                float t;
-
-                if (i == 0)
-                {
-                    t = 0f;
-                }
-                else
-                {
-                    t = i / (float)steps;
-                }
+                float t = i / (float)steps;
 
                 Vector3 position = spline.GetPoint(t);
 
